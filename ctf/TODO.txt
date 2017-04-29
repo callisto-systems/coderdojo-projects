@@ -1,0 +1,5 @@
+Tip de joc cu acțiune f. rapidă gen Unreal Turnament.
+
+- treci prin ite-e și le consumi imediat: health, armură (să apară ca și cuburi plutitoare care se rotesc și dispar după ce intri în ele)
+- butoane ca să îți schimbi armutile
+- respown cu o singură apăsare de buton la kill.
