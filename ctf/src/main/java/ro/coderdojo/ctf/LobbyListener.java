@@ -19,31 +19,34 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Wool;
-import org.bukkit.plugin.java.JavaPlugin;
 
 public class LobbyListener implements Listener {
 
-	JavaPlugin plugin;
 	World lobby;
 
-
-
-	public LobbyListener(JavaPlugin plugin, World lobby) {
-		this.plugin = plugin;
+	public LobbyListener(World lobby) {
 		this.lobby = lobby;
 	}
 
 	@EventHandler
-	public void PlayersListener(PlayerJoinEvent event) throws Exception {
-		System.out.println("PlayerJoinEvent");
+	public void playerJoined(PlayerJoinEvent event) throws Exception {
 		event.getPlayer().setGameMode(GameMode.ADVENTURE);
 		event.getPlayer().getInventory().clear();
+		event.getPlayer().getInventory().addItem(new ItemStack(Material.WOOD_SWORD, 1));
 		AttributeInstance healthAttribute = event.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH); 
 		healthAttribute.setBaseValue(20.00);
 		event.getPlayer().teleport(new Location(lobby, 19.589, 231, 21.860));
-		Players.lobbyNoTeamPlayers.add(event.getPlayer());
+		Players.addNoTeamPlayerLobby(event.getPlayer());
+	}
+	
+	 
+	@EventHandler
+	public void playerLeave(PlayerQuitEvent event) throws Exception {
+		Players.playerLeave(event.getPlayer());
 	}
 
 	@EventHandler
@@ -69,22 +72,10 @@ public class LobbyListener implements Listener {
 		if (walkingBlock.getType() == Material.WOOL) {
 			Wool wool = (Wool) walkingBlock.getState().getData();
 			if (wool.getColor() == DyeColor.RED) {
-				if (Players.lobbyRedPlayers.contains(event.getPlayer())) {
-					return;
-				}
-				event.getPlayer().sendMessage(ChatColor.RED + " Esti in echipa rosie!");
-				Players.lobbyRedPlayers.add(event.getPlayer());
-				Players.lobbyBluePlayers.remove(event.getPlayer());
-				Players.lobbyNoTeamPlayers.remove(event.getPlayer());
+				Players.addRedToLobby(event.getPlayer());
 			}
 			if (wool.getColor() == DyeColor.BLUE) {
-				if (Players.lobbyBluePlayers.contains(event.getPlayer())) {
-					return;
-				}
-				event.getPlayer().sendMessage(ChatColor.BLUE + " Esti in echipa albastra!");
-				Players.lobbyBluePlayers.add(event.getPlayer());
-				Players.lobbyRedPlayers.remove(event.getPlayer());
-				Players.lobbyNoTeamPlayers.remove(event.getPlayer());
+				Players.addBlueToLobby(event.getPlayer());
 			}
 		}
 	}
@@ -96,6 +87,9 @@ public class LobbyListener implements Listener {
 		}
 		Player player = event.getPlayer();
 		Action action = event.getAction();
+		if(event.getClickedBlock() == null) {
+			return;
+		}
 		Material material = event.getClickedBlock().getState().getType();
 		Location location = event.getClickedBlock().getState().getLocation();
 		if (action == Action.RIGHT_CLICK_BLOCK && material == Material.STONE_BUTTON) {
@@ -110,13 +104,13 @@ public class LobbyListener implements Listener {
 			if (location.equals(b1) || location.equals(b2) || location.equals(b3) || location.equals(b4)) {
 				timer();
 				player.sendMessage("Ai pornit meciul!");
-				plugin.getServer().broadcastMessage("Meciul a fost pornit!");
+				CaptureTheFlagPlugin.plugin.getServer().broadcastMessage("Meciul a fost pornit!");
 			}
 		}
 	}
 	
 	private void timer() {
 		CountDownTimer timer = new CountDownTimer(this);
-		timer.runTaskTimer(plugin, 3, 1);
+		timer.runTaskTimer(CaptureTheFlagPlugin.plugin, 3, 1);
 	}
 }

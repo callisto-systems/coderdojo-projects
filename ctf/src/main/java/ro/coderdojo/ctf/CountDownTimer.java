@@ -5,7 +5,8 @@
  */
 package ro.coderdojo.ctf;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Difficulty;
@@ -38,11 +39,11 @@ public class CountDownTimer extends BukkitRunnable {
 	public void run() {
 		if (counter > 0) {
 			if (counter % 20 == 0) {
-				lobbyListener.plugin.getServer().broadcastMessage(ChatColor.WHITE + "Jocul porneste in " + ChatColor.RED + counter / 20 + ChatColor.WHITE + " secunde");
+				CaptureTheFlagPlugin.plugin.getServer().broadcastMessage(ChatColor.WHITE + "Jocul porneste in " + ChatColor.RED + counter / 20 + ChatColor.WHITE + " secunde");
 			}
 			counter = counter - 1;
 		} else {
-			lobbyListener.plugin.getServer().broadcastMessage("Start!");
+			CaptureTheFlagPlugin.plugin.getServer().broadcastMessage("Start!");
 			this.cancel();
 			startGame();
 		}
@@ -55,46 +56,33 @@ public class CountDownTimer extends BukkitRunnable {
 //		PlayerInteractEvent.getHandlerList().unregister(lobbyListener.plugin);
 
 		loadArenaWorld();
-		lobbyListener.plugin.getServer().getPluginManager().registerEvents(new ArenaListener(lobbyListener.plugin, arena), lobbyListener.plugin);
+		CaptureTheFlagPlugin.plugin.getServer().getPluginManager().registerEvents(new ArenaListener(CaptureTheFlagPlugin.plugin, arena), CaptureTheFlagPlugin.plugin);
 		Players.isMatchStarted = true;
 		
 		System.out.println("Arena loaded");
-		Iterator<Player> blueIterator = Players.lobbyBluePlayers.iterator();
-		Players.arenaBluePlayers.clear();
-		while (blueIterator.hasNext()) {
-			Player bluePlayer = blueIterator.next();
-			Players.arenaBluePlayers.add(bluePlayer);
-			blueIterator.remove();
-			System.out.println("teleport blue " + bluePlayer.getDisplayName());
-			bluePlayer.teleport(new Location(arena, 57.896, 77, -163.485));
-			bluePlayer.getInventory().clear();
-			bluePlayer.getInventory().addItem(new ItemStack(Material.WOOD_SWORD, 1));
-			AttributeInstance healthAttribute = bluePlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		List<String> playersLeftInLobby = new ArrayList<>();
+		for(Player player : Players.getAllLobyPlayers()) {
+			if(Players.hasNoTeamInLobby(player)){
+				player.sendMessage("Ai ramas in lobby. Nu ti-ai ales echipa!");
+				playersLeftInLobby.add(player.getName());
+				continue;
+			}
+			Players.moveToArena(player);
+			if(Players.isRed(player)) {
+				player.teleport(new Location(arena, -22.099, 77, -145.093));
+			}
+			if(Players.isBlue(player)) {
+				player.teleport(new Location(arena, 57.896, 77, -163.485));
+			}
+			player.getInventory().clear();
+			player.getInventory().addItem(new ItemStack(Material.WOOD_SWORD, 1));
+			AttributeInstance healthAttribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
 			healthAttribute.setBaseValue(20.00);
 		}
-
-		Iterator<Player> redIterator = Players.lobbyRedPlayers.iterator();
-		Players.arenaRedPlayers.clear();
-		while (redIterator.hasNext()) {
-			Player redPlayer = redIterator.next();
-			Players.arenaRedPlayers.add(redPlayer);
-			redIterator.remove();
-			System.out.println("teleport red " + redPlayer.getDisplayName());
-			redPlayer.teleport(new Location(arena, -22.099, 77, -145.093));
-			redPlayer.getInventory().clear();
-			redPlayer.getInventory().addItem(new ItemStack(Material.WOOD_SWORD, 1));
-			AttributeInstance healthAttribute = redPlayer.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-			healthAttribute.setBaseValue(20.00);
-		}
-
-		String players = "";
-		for (Player noTeamPlayer : Players.lobbyNoTeamPlayers) {
-			noTeamPlayer.sendMessage("Ai ramas in lobby. Nu ti-ai ales echipa!");
-			players += noTeamPlayer.getDisplayName() + " ";
-		}
-		lobbyListener.plugin.getServer().broadcastMessage(
-				ChatColor.WHITE + "Jucatori ramasi in lobby: " + ChatColor.RED + Players.lobbyNoTeamPlayers.size() +
-				ChatColor.WHITE + ". Jucatori: " + ChatColor.RED + players);
+		
+		CaptureTheFlagPlugin.plugin.getServer().broadcastMessage(
+				ChatColor.WHITE + "Jucatori ramasi in lobby: " + ChatColor.RED + playersLeftInLobby.size() +
+				ChatColor.WHITE + ". Jucatori: " + ChatColor.RED + String.join(", ", playersLeftInLobby));
 	}
 
 	private void loadArenaWorld() {

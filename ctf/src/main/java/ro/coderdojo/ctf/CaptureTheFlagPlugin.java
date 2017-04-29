@@ -10,18 +10,21 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CaptureTheFlagPlugin extends JavaPlugin {
 
 	World lobby;
+	
+	public static JavaPlugin plugin;
 
 	@Override
 	public void onEnable() {
 		System.out.println("***********************  CAPTURE THE FLAG PLUGIN ***********************");
 		loadLobbyWorld();
-		getServer().getPluginManager().registerEvents(new LobbyListener(this, lobby), this);
+		plugin = this;
+		getServer().getPluginManager().registerEvents(new LobbyListener(lobby), this);
 	}
 
 	public void loadLobbyWorld() {
 		lobby = Bukkit.getServer().createWorld(new WorldCreator("world_lobby"));
 		lobby.setGameRuleValue("doMobSpawning", "false");
-		lobby.setDifficulty(Difficulty.PEACEFUL);
+		lobby.setDifficulty(Difficulty.HARD);
 	}
 
 	@Override
