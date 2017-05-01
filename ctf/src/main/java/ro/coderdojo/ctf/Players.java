@@ -29,20 +29,20 @@ public class Players {
 	public static List<Player> arenaRedPlayers = new ArrayList<>();
 	public static List<Player> arenaBluePlayers = new ArrayList<>();
 	
+	public static int redKills = 0;
+	public static int blueKills = 0;
+	
 	private static Scoreboard lobyBoard;
 	static {
 		lobyBoard = Bukkit.getScoreboardManager().getNewScoreboard();
-		Objective playersObjective = lobyBoard.registerNewObjective("players", "dummy");
-		playersObjective.setDisplayName("Număr de jucători");
-		playersObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
-				
+		
 		lobyBoard.registerNewTeam("blueTeam");
 		lobyBoard.getTeam("blueTeam").setPrefix(ChatColor.BLUE + "[ALBASTRU] " + ChatColor.WHITE + "[");
 		lobyBoard.getTeam("blueTeam").setSuffix("]");
 		lobyBoard.getTeam("blueTeam").setDisplayName("Echipa Albastră");
 		lobyBoard.getTeam("blueTeam").setCanSeeFriendlyInvisibles(true);
 		lobyBoard.getTeam("blueTeam").setAllowFriendlyFire(false);
-		
+
 		lobyBoard.registerNewTeam("redTeam");
 		lobyBoard.getTeam("redTeam").setPrefix(ChatColor.RED + "[ROȘU] " + ChatColor.WHITE + "[");
 		lobyBoard.getTeam("redTeam").setSuffix("]");
@@ -51,20 +51,38 @@ public class Players {
 		lobyBoard.getTeam("redTeam").setAllowFriendlyFire(false);
 	}
 
-
 	static void playerLeave(Player player) {
-		if(isBlue(player)) {
+		if (isBlue(player)) {
 			lobyBoard.getTeam("blueTeam").removeEntry(player.getName());
 		}
-		if(isRed(player)) {
+		if (isRed(player)) {
 			lobyBoard.getTeam("redTeam").removeEntry(player.getName());
 		}
+		player.getScoreboard().getObjective(player.getName() + "_deaths").unregister();
+		
 		lobbyRedPlayers.remove(player);
 		lobbyBluePlayers.remove(player);
 		lobbyNoTeamPlayers.remove(player);
 		arenaRedPlayers.remove(player);
 		arenaBluePlayers.remove(player);
-		
+
+		refreshLobbyBoards(player);
+	}
+
+	public static void addNoTeamPlayerLobby(Player player) {
+		if (lobbyNoTeamPlayers.contains(player)) {
+			return;
+		}
+		lobbyRedPlayers.remove(player);
+		lobbyBluePlayers.remove(player);
+		lobbyNoTeamPlayers.add(player);
+
+		Objective deathsObjective = lobyBoard.registerNewObjective(player.getName() + "_deaths", "playerKillCount");
+		deathsObjective.setDisplayName("Kills");
+		deathsObjective.getScore("kills").setScore(0);
+		deathsObjective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
+
+		player.sendMessage(ChatColor.GOLD + " Încă nu ai intrat în nici o echipă");
 		refreshLobbyBoards(player);
 	}
 
@@ -82,23 +100,6 @@ public class Players {
 		refreshLobbyBoards(player);
 	}
 
-	public static void addNoTeamPlayerLobby(Player player) {
-		if (lobbyNoTeamPlayers.contains(player)) {
-			return;
-		}
-		lobbyRedPlayers.remove(player);
-		lobbyBluePlayers.remove(player);
-		lobbyNoTeamPlayers.add(player);
-		
-		Objective deathsObjective = lobyBoard.registerNewObjective(player.getName()+"_deaths", "playerKillCount");
-		deathsObjective.setDisplayName("Kills");
-		deathsObjective.getScore("kills").setScore(0);
-		deathsObjective.setDisplaySlot(DisplaySlot.PLAYER_LIST);
-		
-		player.sendMessage(ChatColor.GOLD + " Încă nu ai intrat în nici o echipă");
-		refreshLobbyBoards(player);
-	}
-
 	public static void addBlueToLobby(Player player) {
 		lobyBoard.getTeam("blueTeam").addEntry(player.getName());
 		if (lobbyBluePlayers.contains(player)) {
@@ -112,41 +113,43 @@ public class Players {
 		refreshLobbyBoards(player);
 	}
 
-	private static void refreshLobbyBoards(Player newPlayer) {
-		if (newPlayer != null) {
-			if (newPlayer.getScoreboard().getObjective("players") == null) {
-				newPlayer.setScoreboard(lobyBoard);
+	public static void refreshLobbyBoards(Player player) {
+		//set score board to player (usefull if player is new)
+		if (player != null) {
+			if (player.getScoreboard().getObjective("players") == null) {
+				player.setScoreboard(lobyBoard);
 			}
 		}
-
-		lobyBoard.getObjective("players").getScore(ChatColor.GOLD + "Fără echipă:").setScore(lobbyNoTeamPlayers.size());
-		lobyBoard.getObjective("players").getScore(ChatColor.BLUE + "Albaștrii:").setScore(lobbyBluePlayers.size());
-		lobyBoard.getObjective("players").getScore(ChatColor.RED + "Roșii:").setScore(lobbyRedPlayers.size());
 		
-//		for (Player player : getAllLobyPlayers()) {
-//			setTeamLabel(player);
-//		}
-	}
+		Objective objective = lobyBoard.getObjective("players");
+		
+		if(objective != null) {
+			objective.unregister();
+		}
+		
+		Objective playersObjective = lobyBoard.registerNewObjective("players", "dummy");
+		playersObjective.setDisplayName("Killuri");
+		playersObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
+		
+						
+		System.out.println("Set Objectives...");
+		 
+		
+		lobyBoard.getObjective("players").getScore(ChatColor.GOLD + String.format("%1$-16s:%2$4d", "Jucători Fără echipă", lobbyNoTeamPlayers.size())).setScore(-1);
+		lobyBoard.getObjective("players").getScore(ChatColor.BLUE + String.format("%1$-16s:%2$4d", "Jucători Albaștrii", lobbyBluePlayers.size())).setScore(-2);
+		lobyBoard.getObjective("players").getScore(ChatColor.RED + String.format("%1$-16s:%2$4d", "Jucători Roșii", lobbyRedPlayers.size())).setScore(-3);
+		
+		
+		lobyBoard.getObjective("players").getScore(ChatColor.WHITE + " ").setScore(-4);
+		lobyBoard.getObjective("players").getScore(ChatColor.WHITE + " Număr de jucători").setScore(-5);
+		
+		
+		lobyBoard.getObjective("players").getScore(ChatColor.GOLD + String.format("%1$-16s:%2$4d", "Killuri Roșii", redKills)).setScore(-6);
+		lobyBoard.getObjective("players").getScore(ChatColor.GOLD + String.format("%1$-16s:%2$4d", "Killuri Albaștrii", blueKills)).setScore(-7);
 
-//	private static void setTeamLabel(Player player) {
-//		if (player.getScoreboard().getObjective("team_title") == null) {
-//			Objective objective = player.getScoreboard().registerNewObjective("team_title", "dummy");
-//			objective.setDisplaySlot(DisplaySlot.BELOW_NAME);
-//		}
-//
-//		if (hasNoTeamInLobby(player)) {
-//			System.out.println("-> Add score header [no lobby]: " + player.getName());
-//			player.getScoreboard().getObjective("team_title").setDisplayName(ChatColor.GOLD + "Fără echipă " + player.getName());
-//		}
-//		if (isRedInLobby(player)) {
-//			System.out.println("-> Add score header: [red] " + player.getName());
-//			player.getScoreboard().getObjective("team_title").setDisplayName(ChatColor.RED + "Roșu" + player.getName());
-//		}
-//		if (isBlueInLobby(player)) {
-//			System.out.println("-> Add score header: [blue]" + player.getName());
-//			player.getScoreboard().getObjective("team_title").setDisplayName(ChatColor.BLUE + "Albastru" + player.getName());
-//		}
-//	}
+		//16
+		
+	}
 
 	public static List<Player> getAllLobyPlayers() {
 		List<Player> allPlayers = new ArrayList<>();
@@ -180,6 +183,13 @@ public class Players {
 
 	public static boolean isRed(Player player) {
 		return isRedInArena(player) || isRedInLobby(player);
+	}
+	
+	public static boolean isBlue(String playerName) {
+		if (lobyBoard.getTeam("blueTeam").hasEntry(playerName)) {
+			return true;
+		}
+		return false;
 	}
 
 	public static boolean isBlue(Player player) {

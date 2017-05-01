@@ -1,5 +1,33 @@
 Tip de joc cu acțiune f. rapidă gen Unreal Turnament.
 
-- treci prin ite-e și le consumi imediat: health, armură (să apară ca și cuburi plutitoare care se rotesc și dispar după ce intri în ele)
-- butoane ca să îți schimbi armutile
-- respown cu o singură apăsare de buton la kill.
+- treci prin item-muri (holograme like) și le consumi imediat: health, armură (să apară ca și cuburi plutitoare care se rotesc și dispar după ce intri în ele)
+
+- butoane ca să îți schimbi armurile
+
+- lobby -încă un scoreboard cu killirile celor 2 echipe
+- adaugi la nume (ojective) numărul de kiluri.
+
+- la player move pui limită să nu fie x și y mai mare dât ceva și day event.cance (nu iese din zona arenei/loby din hartă)
+
+- arcul nu mai trebuie să se încarce, și trage imediat chiar dacaă nu ai dat drumul la buton.
+- arc cu bombă la destinație
+- arc cu încărcare care are velocty maxim dar la încăcare de fapt încarci căt damage face. 
+- grafică custom la arcurile astea
+
+
+-steagul se comportă ca la Unreal: care la death și se întoarce după x secunde.
+
+
+
+-----------------------------------------------------------------------
+
+   public static void sendActionChatPacket(Player player, String text) {
+        IChatBaseComponent comp = ChatSerializer
+                    .a("{\"text\":\"" + text + " \"}");
+        PacketPlayOutChat packet = new PacketPlayOutChat(comp, 2, true);
+        ((CraftPlayer)player).getHandle().playerConnection.sendPacket(packet);
+    }
+	
+	
+	
+	CommandSender.sendMessage()

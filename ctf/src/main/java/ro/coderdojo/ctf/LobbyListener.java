@@ -16,6 +16,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -37,13 +38,12 @@ public class LobbyListener implements Listener {
 		event.getPlayer().setGameMode(GameMode.ADVENTURE);
 		event.getPlayer().getInventory().clear();
 		event.getPlayer().getInventory().addItem(new ItemStack(Material.WOOD_SWORD, 1));
-		AttributeInstance healthAttribute = event.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH); 
+		AttributeInstance healthAttribute = event.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH);
 		healthAttribute.setBaseValue(20.00);
 		event.getPlayer().teleport(new Location(lobby, 19.589, 231, 21.860));
 		Players.addNoTeamPlayerLobby(event.getPlayer());
 	}
-	
-	 
+
 	@EventHandler
 	public void playerLeave(PlayerQuitEvent event) throws Exception {
 		Players.playerLeave(event.getPlayer());
@@ -51,10 +51,27 @@ public class LobbyListener implements Listener {
 
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
-		if(!Players.isInLobby(event.getPlayer())) {
+		if (!Players.isInLobby(event.getPlayer())) {
 			return;
 		}
 		event.setRespawnLocation(new Location(lobby, 19.589, 231, 21.860));
+	}
+
+	@EventHandler
+	public void onKill(PlayerDeathEvent event) {
+		Player killed = event.getEntity();
+		Player killer = event.getEntity().getKiller();
+		
+		if(killer == null) {
+			return;
+		}
+		if (Players.isRed(killer)) {
+			Players.redKills++;
+		} else {
+			Players.blueKills++;
+		}
+
+		Players.refreshLobbyBoards(event.getEntity());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -65,7 +82,7 @@ public class LobbyListener implements Listener {
 
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
-		if(!Players.isInLobby(event.getPlayer())) {
+		if (!Players.isInLobby(event.getPlayer())) {
 			return;
 		}
 		Block walkingBlock = event.getTo().getBlock().getRelative(BlockFace.DOWN);
@@ -82,18 +99,18 @@ public class LobbyListener implements Listener {
 
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
-		if(!Players.isInLobby(event.getPlayer())) {
+		if (!Players.isInLobby(event.getPlayer())) {
 			return;
 		}
 		Player player = event.getPlayer();
 		Action action = event.getAction();
-		if(event.getClickedBlock() == null) {
+		if (event.getClickedBlock() == null) {
 			return;
 		}
 		Material material = event.getClickedBlock().getState().getType();
 		Location location = event.getClickedBlock().getState().getLocation();
 		if (action == Action.RIGHT_CLICK_BLOCK && material == Material.STONE_BUTTON) {
-			if(Players.isMatchStarted) {
+			if (Players.isMatchStarted) {
 				player.sendMessage("Meciul este deja pornit! Asteapta sa se termine!");
 				return;
 			}
@@ -108,7 +125,7 @@ public class LobbyListener implements Listener {
 			}
 		}
 	}
-	
+
 	private void timer() {
 		CountDownTimer timer = new CountDownTimer(this);
 		timer.runTaskTimer(CaptureTheFlagPlugin.plugin, 3, 1);
