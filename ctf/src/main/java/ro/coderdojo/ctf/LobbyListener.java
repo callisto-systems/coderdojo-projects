@@ -67,7 +67,9 @@ public class LobbyListener implements Listener {
 		}
 		if (Players.isRed(killer)) {
 			Players.redKills++;
-		} else {
+		}
+		
+		if(Players.isBlue(killer)) {
 			Players.blueKills++;
 		}
 

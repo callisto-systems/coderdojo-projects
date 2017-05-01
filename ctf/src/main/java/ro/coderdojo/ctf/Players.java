@@ -128,27 +128,23 @@ public class Players {
 		}
 		
 		Objective playersObjective = lobyBoard.registerNewObjective("players", "dummy");
-		playersObjective.setDisplayName("Killuri");
+		playersObjective.setDisplayName("");
 		playersObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
 		
 						
 		System.out.println("Set Objectives...");
-		 
 		
-		lobyBoard.getObjective("players").getScore(ChatColor.GOLD + String.format("%1$-16s:%2$4d", "Jucători Fără echipă", lobbyNoTeamPlayers.size())).setScore(-1);
-		lobyBoard.getObjective("players").getScore(ChatColor.BLUE + String.format("%1$-16s:%2$4d", "Jucători Albaștrii", lobbyBluePlayers.size())).setScore(-2);
-		lobyBoard.getObjective("players").getScore(ChatColor.RED + String.format("%1$-16s:%2$4d", "Jucători Roșii", lobbyRedPlayers.size())).setScore(-3);
+		lobyBoard.getObjective("players").getScore(ChatColor.DARK_GRAY + " Killuri").setScore(-1);
 		
+		lobyBoard.getObjective("players").getScore(ChatColor.RED + "Killuri Roșii: " + ChatColor.WHITE + redKills).setScore(-2);
+		lobyBoard.getObjective("players").getScore(ChatColor.BLUE + "Killuri Albaștrii: " + ChatColor.WHITE + blueKills).setScore(-3);
 		
 		lobyBoard.getObjective("players").getScore(ChatColor.WHITE + " ").setScore(-4);
-		lobyBoard.getObjective("players").getScore(ChatColor.WHITE + " Număr de jucători").setScore(-5);
+		lobyBoard.getObjective("players").getScore(ChatColor.DARK_GRAY + " Număr de jucători").setScore(-5);
 		
-		
-		lobyBoard.getObjective("players").getScore(ChatColor.GOLD + String.format("%1$-16s:%2$4d", "Killuri Roșii", redKills)).setScore(-6);
-		lobyBoard.getObjective("players").getScore(ChatColor.GOLD + String.format("%1$-16s:%2$4d", "Killuri Albaștrii", blueKills)).setScore(-7);
-
-		//16
-		
+		lobyBoard.getObjective("players").getScore(ChatColor.GOLD + "Jucători Fără echipă: " + ChatColor.WHITE + lobbyNoTeamPlayers.size()).setScore(-6);
+		lobyBoard.getObjective("players").getScore(ChatColor.BLUE + "Jucători Albaștrii: " + ChatColor.WHITE + lobbyBluePlayers.size()).setScore(-7);
+		lobyBoard.getObjective("players").getScore(ChatColor.RED + "Jucători Roșii: " + ChatColor.WHITE + lobbyRedPlayers.size()).setScore(-8);		
 	}
 
 	public static List<Player> getAllLobyPlayers() {
