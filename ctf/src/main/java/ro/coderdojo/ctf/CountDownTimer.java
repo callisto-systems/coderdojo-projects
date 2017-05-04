@@ -57,21 +57,21 @@ public class CountDownTimer extends BukkitRunnable {
 
 		loadArenaWorld();
 		CaptureTheFlagPlugin.plugin.getServer().getPluginManager().registerEvents(new ArenaListener(CaptureTheFlagPlugin.plugin, arena), CaptureTheFlagPlugin.plugin);
-		Players.isMatchStarted = true;
+		ScoresAndTeams.isMatchStarted = true;
 		
 		System.out.println("Arena loaded");
 		List<String> playersLeftInLobby = new ArrayList<>();
-		for(Player player : Players.getAllLobyPlayers()) {
-			if(Players.hasNoTeamInLobby(player)){
+		for(Player player : ScoresAndTeams.getAllLobyPlayers()) {
+			if(ScoresAndTeams.hasNoTeamInLobby(player)){
 				player.sendMessage("Ai ramas in lobby. Nu ti-ai ales echipa!");
 				playersLeftInLobby.add(player.getName());
 				continue;
 			}
-			Players.moveToArena(player);
-			if(Players.isRed(player)) {
+			ScoresAndTeams.moveToArena(player);
+			if(ScoresAndTeams.isRed(player)) {
 				player.teleport(new Location(arena, -22.099, 77, -145.093));
 			}
-			if(Players.isBlue(player)) {
+			if(ScoresAndTeams.isBlue(player)) {
 				player.teleport(new Location(arena, 57.896, 77, -163.485));
 			}
 			player.getInventory().clear();

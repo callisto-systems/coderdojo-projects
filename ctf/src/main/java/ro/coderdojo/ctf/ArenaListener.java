@@ -19,13 +19,13 @@ public class ArenaListener implements Listener {
 	
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
-		if(!Players.isInArena(event.getPlayer())) {
+		if(!ScoresAndTeams.isInArena(event.getPlayer())) {
 			return;
 		}
-		if(Players.arenaRedPlayers.contains(event.getPlayer())) {
+		if(ScoresAndTeams.arenaRedPlayers.contains(event.getPlayer())) {
 			event.setRespawnLocation(new Location(arena, -22.099, 77, -145.093));
 		}
-		if(Players.arenaBluePlayers.contains(event.getPlayer())) {
+		if(ScoresAndTeams.arenaBluePlayers.contains(event.getPlayer())) {
 			event.setRespawnLocation(new Location(arena, 57.896, 77, -163.485));
 		}
 	}

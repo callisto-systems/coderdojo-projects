@@ -18,11 +18,11 @@ import org.bukkit.scoreboard.Scoreboard;
  *
  * @author mihai
  */
-public class Players {
+public class ScoresAndTeams {
 
 	public static boolean isMatchStarted = false;
 
-	private static List<Player> lobbyNoTeamPlayers = new ArrayList<>();
+	public static List<Player> lobbyNoTeamPlayers = new ArrayList<>();
 	private static List<Player> lobbyRedPlayers = new ArrayList<>();
 	private static List<Player> lobbyBluePlayers = new ArrayList<>();
 

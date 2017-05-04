@@ -20,7 +20,7 @@ Tip de joc cu acțiune f. rapidă gen Unreal Turnament.
 
 
 -----------------------------------------------------------------------
-
+PICĂ:
    public static void sendActionChatPacket(Player player, String text) {
         IChatBaseComponent comp = ChatSerializer
                     .a("{\"text\":\"" + text + " \"}");
@@ -31,3 +31,13 @@ Tip de joc cu acțiune f. rapidă gen Unreal Turnament.
 	
 	
 	CommandSender.sendMessage()
+	
+	
+-----------------------------------------------------------------------
+arenă masfă: https://dev.bukkit.org/projects/ctf/pages/maps
+flag make to glow
+make flag with dys: https://www.spigotmc.org/threads/create-customized-banners-using-the-bukkit-api.75915/
+	șî cap de schelet:
+	http://www.minecraft101.net/r/banners.html
+	
+- nu e backpach - adaugi flagul la locatia sucătorului la player move.

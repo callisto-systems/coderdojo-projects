@@ -10,6 +10,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -35,23 +36,49 @@ public class LobbyListener implements Listener {
 
 	@EventHandler
 	public void playerJoined(PlayerJoinEvent event) throws Exception {
-		event.getPlayer().setGameMode(GameMode.ADVENTURE);
-		event.getPlayer().getInventory().clear();
-		event.getPlayer().getInventory().addItem(new ItemStack(Material.WOOD_SWORD, 1));
-		AttributeInstance healthAttribute = event.getPlayer().getAttribute(Attribute.GENERIC_MAX_HEALTH);
+		Player player = event.getPlayer();
+		player.setGameMode(GameMode.ADVENTURE);
+		player.getInventory().clear();
+		player.getInventory().addItem(new ItemStack(Material.WOOD_SWORD, 1));
+		AttributeInstance healthAttribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
 		healthAttribute.setBaseValue(20.00);
-		event.getPlayer().teleport(new Location(lobby, 19.589, 231, 21.860));
-		Players.addNoTeamPlayerLobby(event.getPlayer());
+//		player.teleport(new Location(lobby, 19.589, 231, 21.860));
+		player.teleport(new Location(lobby, 29, 231, 10));
+		ScoresAndTeams.addNoTeamPlayerLobby(player);
+
+//		if (ScoresAndTeams.lobbyNoTeamPlayers.size() == 1) {
+//			new BukkitRunnable() {
+//				//EnumParticle.PORTAL // mov
+//				//EnumParticle.REDSTONE // toaate culorile
+//				EnumParticle particle = EnumParticle.VILLAGER_HAPPY;
+//
+//				@Override
+//				public void run() {
+//					//params: particula,dacă e enable, locația, offset-ul, viteza, numar particule
+//					PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, true, player.getLocation().getBlockX(), player.getLocation().getBlockY() + 2, player.getLocation().getBlockZ(), 1, 5, 1, 1, 30);
+//					for (Player online : Bukkit.getOnlinePlayers()) {
+//						((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+//					}
+//				}
+//			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 1);
+//		}
+
+		// b is the Bukkit block that has changed
+		Block b = player.getLocation().getBlock();
+		net.minecraft.server.v1_11_R1.Chunk c = ((org.bukkit.craftbukkit.v1_11_R1.CraftChunk) b.getChunk()).getHandle();
+		c.initLighting();
+//		((org.bukkit.craftbukkit.v1_11_R1.CraftWorld) player.getWorld()).getHandle().notify();
+
 	}
 
 	@EventHandler
 	public void playerLeave(PlayerQuitEvent event) throws Exception {
-		Players.playerLeave(event.getPlayer());
+		ScoresAndTeams.playerLeave(event.getPlayer());
 	}
 
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
-		if (!Players.isInLobby(event.getPlayer())) {
+		if (!ScoresAndTeams.isInLobby(event.getPlayer())) {
 			return;
 		}
 		event.setRespawnLocation(new Location(lobby, 19.589, 231, 21.860));
@@ -61,19 +88,19 @@ public class LobbyListener implements Listener {
 	public void onKill(PlayerDeathEvent event) {
 		Player killed = event.getEntity();
 		Player killer = event.getEntity().getKiller();
-		
-		if(killer == null) {
+
+		if (killer == null) {
 			return;
 		}
-		if (Players.isRed(killer)) {
-			Players.redKills++;
-		}
-		
-		if(Players.isBlue(killer)) {
-			Players.blueKills++;
+		if (ScoresAndTeams.isRed(killer)) {
+			ScoresAndTeams.redKills++;
 		}
 
-		Players.refreshLobbyBoards(event.getEntity());
+		if (ScoresAndTeams.isBlue(killer)) {
+			ScoresAndTeams.blueKills++;
+		}
+
+		ScoresAndTeams.refreshLobbyBoards(event.getEntity());
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -84,24 +111,73 @@ public class LobbyListener implements Listener {
 
 	@EventHandler
 	public void onPlayerMove(PlayerMoveEvent event) {
-		if (!Players.isInLobby(event.getPlayer())) {
+		if (!ScoresAndTeams.isInLobby(event.getPlayer())) {
 			return;
 		}
 		Block walkingBlock = event.getTo().getBlock().getRelative(BlockFace.DOWN);
 		if (walkingBlock.getType() == Material.WOOL) {
 			Wool wool = (Wool) walkingBlock.getState().getData();
 			if (wool.getColor() == DyeColor.RED) {
-				Players.addRedToLobby(event.getPlayer());
+				ScoresAndTeams.addRedToLobby(event.getPlayer());
 			}
 			if (wool.getColor() == DyeColor.BLUE) {
-				Players.addBlueToLobby(event.getPlayer());
+				ScoresAndTeams.addBlueToLobby(event.getPlayer());
 			}
+		}
+
+//		System.out.println();
+//		System.out.println("*************** MOVE ********************");
+//		
+//		Block from = event.getFrom().getBlock().getRelative(BlockFace.UP);
+//		Block to = event.getTo().getBlock().getRelative(BlockFace.UP);
+//		
+//		System.out.println("---------------------------------");
+//		System.out.println("from up " + from.getType());
+//		System.out.println("to up " + to.getType());
+//		
+//		Block from2 = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
+//		Block to2 = event.getTo().getBlock().getRelative(BlockFace.DOWN);
+//		
+//		System.out.println("---------------------------------");
+//		System.out.println("from down " + from2.getType());
+//		System.out.println("to down " + to2.getType());
+//		
+//		Block from3 = event.getFrom().getBlock();
+//		Block to3 = event.getTo().getBlock();
+//		
+//		System.out.println("---------------------------------");
+//		System.out.println("from --- " + from3.getType());
+//		System.out.println("to --- " + to3.getType());
+//EnumParticl
+//
+//		!!!
+//PacketPlayOutWorldParticles
+//		!!!!
+		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
+		Block to = event.getTo().getBlock().getRelative(BlockFace.DOWN);
+
+		boolean movedToAnotherBlock = true;
+		if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
+			movedToAnotherBlock = false;
+		}
+
+		if (movedToAnotherBlock && to.getType() != Material.AIR) { //&& !(to.getType() != Material.AIR || to.getType() != Material.WATER)
+			//restore last bloack
+			if (lastBlock != null) {
+				lastBlock.update(true);
+			}
+			//save current block
+			lastBlock = walkingBlock.getState();
+			//replace current wuth glowstone
+			to.setType(Material.BEACON);
 		}
 	}
 
+	static BlockState lastBlock;
+
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
-		if (!Players.isInLobby(event.getPlayer())) {
+		if (!ScoresAndTeams.isInLobby(event.getPlayer())) {
 			return;
 		}
 		Player player = event.getPlayer();
@@ -112,7 +188,7 @@ public class LobbyListener implements Listener {
 		Material material = event.getClickedBlock().getState().getType();
 		Location location = event.getClickedBlock().getState().getLocation();
 		if (action == Action.RIGHT_CLICK_BLOCK && material == Material.STONE_BUTTON) {
-			if (Players.isMatchStarted) {
+			if (ScoresAndTeams.isMatchStarted) {
 				player.sendMessage("Meciul este deja pornit! Asteapta sa se termine!");
 				return;
 			}
