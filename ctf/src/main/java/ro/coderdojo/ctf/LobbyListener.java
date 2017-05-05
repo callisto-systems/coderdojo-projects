@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.v1_11_R1.EnumParticle;
-import net.minecraft.server.v1_11_R1.PacketPlayOutWorldParticles;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -27,8 +24,9 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 
+
 import org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner;
-import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_11_R1.block.CraftBlockState;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -64,97 +62,89 @@ public class LobbyListener implements Listener {
 		ScoresAndTeams.addNoTeamPlayerLobby(player);
 	}
 	
-	CraftBanner crafRedBannerState;
+	CraftBanner craftBannerState;
 	
 	private void setFlagRed() {
 		Location location = new Location(lobby, 18, 231, 3);
 		Block block = location.getBlock();
 		
-		BlockState stateX = block.getState();
-		stateX.setType(Material.STANDING_BANNER);
+//		BlockState stateX = block.getState();
+//		stateX.setType(Material.STANDING_BANNER);
 		
-		crafRedBannerState = (CraftBanner) (org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner) stateX;
+		craftBannerState = (CraftBanner) block.getState();
 
-		MaterialData metadata = crafRedBannerState.getData();
+		MaterialData metadata = craftBannerState.getData();
 		metadata.setData((byte) (4 & 0xFF));
 
-//		crafRedBannerState.setType(Material.STANDING_BANNER);
-		crafRedBannerState.setBaseColor(DyeColor.RED);
-		stateX.update();
-
+		craftBannerState.setType(Material.STANDING_BANNER);
+		craftBannerState.setBaseColor(DyeColor.RED);
+		
 		List<Pattern> patterns = new ArrayList<Pattern>(); //Create a new List called 'patterns'
 
-//		patterns.add(new Pattern(DyeColor.RED, PatternType.HALF_HORIZONTAL));
-//		patterns.add(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
-//		patterns.add(new Pattern(DyeColor.RED, PatternType.STRIPE_TOP));
-//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.STRIPE_BOTTOM));
-//		patterns.add(new Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
-//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.CIRCLE_MIDDLE));
 		patterns.add(new Pattern(DyeColor.WHITE, PatternType.SKULL));
-//		patterns.add(new Pattern(DyeColor.MAGENTA, PatternType.BORDER));
 
-		crafRedBannerState.setPatterns(patterns);
-		crafRedBannerState.update();
+		craftBannerState.setPatterns(patterns);
+		craftBannerState.update();
 		
 		new BukkitRunnable() {
 				@Override
 				public void run() {
-					MaterialData metadata = crafRedBannerState.getData();
+					MaterialData metadata = craftBannerState.getData();
 					byte newData = (byte) (metadata.getData() + ((byte)1));
 					if((newData & 0xFF) > (15 & 0xFF)) {
 						newData = 0 & 0xFF;
 					}
 					metadata.setData(newData);
-					crafRedBannerState.update();
+					craftBannerState.update();
 				}
 			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 4);
 
 	}
 	
-	CraftBanner crafBlueBannerState;
-	private void setFlagBlue() {
-		Location location = new Location(lobby, 21, 231, 1);
-		Block block = location.getBlock();
-		
-		BlockState stateX = block.getState();
-		stateX.setType(Material.STANDING_BANNER);
-		stateX.update();
-		
-		crafBlueBannerState = (CraftBanner) (org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner) stateX;
-
-		MaterialData metadata = crafBlueBannerState.getData();
-		metadata.setData((byte) (4 & 0xFF));
-
-		crafBlueBannerState.setBaseColor(DyeColor.BLUE);
-
-		List<Pattern> patterns = new ArrayList<Pattern>(); //Create a new List called 'patterns'
-
-//		patterns.add(new Pattern(DyeColor.RED, PatternType.HALF_HORIZONTAL));
-//		patterns.add(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
-//		patterns.add(new Pattern(DyeColor.RED, PatternType.STRIPE_TOP));
-//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.STRIPE_BOTTOM));
-//		patterns.add(new Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
-//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.CIRCLE_MIDDLE));
-		patterns.add(new Pattern(DyeColor.WHITE, PatternType.CREEPER));
-//		patterns.add(new Pattern(DyeColor.MAGENTA, PatternType.BORDER));
-
-		crafBlueBannerState.setPatterns(patterns);
-		crafBlueBannerState.update();
-		
-		new BukkitRunnable() {
-				@Override
-				public void run() {
-					MaterialData metadata = crafBlueBannerState.getData();
-					byte newData = (byte) (metadata.getData() + ((byte)1));
-					if((newData & 0xFF) > (15 & 0xFF)) {
-						newData = 0 & 0xFF;
-					}
-					metadata.setData(newData);
-					crafBlueBannerState.update();
-				}
-			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 4);
-
-	}
+//	CraftBlockState crafBlueBannerState;
+//	private void setFlagBlue() {
+//		Location location = new Location(lobby, 21, 231, 1);
+//		Block block = location.getBlock();
+//		
+//		BlockState stateX = block.getState();
+//		stateX.setType(Material.STANDING_BANNER);
+//		stateX.update();
+//		
+//		crafBlueBannerState = (CraftBlockState) (CraftBlockState) stateX;
+//
+//		MaterialData metadata = crafBlueBannerState.getData();
+//		metadata.setData((byte) (4 & 0xFF));
+//
+//		crafBlueBannerState.setBaseColor(DyeColor.BLUE);
+//
+//		List<Pattern> patterns = new ArrayList<Pattern>(); //Create a new List called 'patterns'
+//
+////		patterns.add(new Pattern(DyeColor.RED, PatternType.HALF_HORIZONTAL));
+////		patterns.add(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
+////		patterns.add(new Pattern(DyeColor.RED, PatternType.STRIPE_TOP));
+////		patterns.add(new Pattern(DyeColor.WHITE, PatternType.STRIPE_BOTTOM));
+////		patterns.add(new Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
+////		patterns.add(new Pattern(DyeColor.WHITE, PatternType.CIRCLE_MIDDLE));
+//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.CREEPER));
+////		patterns.add(new Pattern(DyeColor.MAGENTA, PatternType.BORDER));
+//
+//		crafBlueBannerState.setPatterns(patterns);
+//		crafBlueBannerState.update();
+//		
+//		new BukkitRunnable() {
+//				@Override
+//				public void run() {
+//					MaterialData metadata = crafBlueBannerState.getData();
+//					byte newData = (byte) (metadata.getData() + ((byte)1));
+//					if((newData & 0xFF) > (15 & 0xFF)) {
+//						newData = 0 & 0xFF;
+//					}
+//					metadata.setData(newData);
+//					crafBlueBannerState.update();
+//				}
+//			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 4);
+//
+//	}
 
 	@EventHandler
 	public void playerLeave(PlayerQuitEvent event) throws Exception {
