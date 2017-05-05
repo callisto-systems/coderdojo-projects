@@ -28,6 +28,7 @@ public class CountDownTimer extends BukkitRunnable {
 
 	LobbyListener lobbyListener;
 	World arena;
+	ArenaListener arenaListener;
 
 	private int counter = 10 * 20;
 
@@ -56,8 +57,10 @@ public class CountDownTimer extends BukkitRunnable {
 //		PlayerInteractEvent.getHandlerList().unregister(lobbyListener.plugin);
 
 		loadArenaWorld();
-		CaptureTheFlagPlugin.plugin.getServer().getPluginManager().registerEvents(new ArenaListener(CaptureTheFlagPlugin.plugin, arena), CaptureTheFlagPlugin.plugin);
+		arenaListener = new ArenaListener(CaptureTheFlagPlugin.plugin, arena);
+		CaptureTheFlagPlugin.plugin.getServer().getPluginManager().registerEvents(arenaListener, CaptureTheFlagPlugin.plugin);
 		ScoresAndTeams.isMatchStarted = true;
+		
 		
 		System.out.println("Arena loaded");
 		List<String> playersLeftInLobby = new ArrayList<>();
@@ -83,6 +86,8 @@ public class CountDownTimer extends BukkitRunnable {
 		CaptureTheFlagPlugin.plugin.getServer().broadcastMessage(
 				ChatColor.WHITE + "Jucatori ramasi in lobby: " + ChatColor.RED + playersLeftInLobby.size() +
 				ChatColor.WHITE + ". Jucatori: " + ChatColor.RED + String.join(", ", playersLeftInLobby));
+		restartGame();
+		
 	}
 
 	private void loadArenaWorld() {

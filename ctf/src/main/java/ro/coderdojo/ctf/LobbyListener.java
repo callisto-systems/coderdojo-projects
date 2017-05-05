@@ -1,34 +1,45 @@
 package ro.coderdojo.ctf;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import net.minecraft.server.v1_11_R1.EnumSkyBlock;
-import org.bukkit.ChatColor;
-import org.bukkit.DyeColor;
+import java.util.List;
+import java.util.Map;
+import net.minecraft.server.v1_11_R1.EnumParticle;
+import net.minecraft.server.v1_11_R1.PacketPlayOutWorldParticles;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.ChatColor;
+import org.bukkit.DyeColor;
+import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
-import org.bukkit.craftbukkit.v1_11_R1.CraftWorld;
-import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
+import org.bukkit.block.banner.Pattern;
+import org.bukkit.block.banner.PatternType;
+
+import org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner;
+import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 import org.bukkit.material.Wool;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class LobbyListener implements Listener {
 
@@ -36,6 +47,8 @@ public class LobbyListener implements Listener {
 
 	public LobbyListener(World lobby) {
 		this.lobby = lobby;
+		setFlagRed();
+//		setFlagBlue();
 	}
 
 	@EventHandler
@@ -47,52 +60,100 @@ public class LobbyListener implements Listener {
 		AttributeInstance healthAttribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
 		healthAttribute.setBaseValue(20.00);
 //		player.teleport(new Location(lobby, 19.589, 231, 21.860));
-		player.teleport(new Location(lobby, 29, 231, 10));
+		player.teleport(new Location(lobby, 18, 231, 3));
 		ScoresAndTeams.addNoTeamPlayerLobby(player);
+	}
+	
+	CraftBanner crafRedBannerState;
+	
+	private void setFlagRed() {
+		Location location = new Location(lobby, 18, 231, 3);
+		Block block = location.getBlock();
+		
+		BlockState stateX = block.getState();
+		stateX.setType(Material.STANDING_BANNER);
+		
+		crafRedBannerState = (CraftBanner) (org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner) stateX;
 
-//		if (ScoresAndTeams.lobbyNoTeamPlayers.size() == 1) {
-//			new BukkitRunnable() {
-//				//EnumParticle.PORTAL // mov
-//				//EnumParticle.REDSTONE // toaate culorile
-//				EnumParticle particle = EnumParticle.VILLAGER_HAPPY;
-//
-//				@Override
-//				public void run() {
-//					//params: particula,dacă e enable, locația, offset-ul, viteza, numar particule
-//					PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, true, player.getLocation().getBlockX(), player.getLocation().getBlockY() + 2, player.getLocation().getBlockZ(), 1, 5, 1, 1, 30);
-//					for (Player online : Bukkit.getOnlinePlayers()) {
-//						((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
-//					}
-//				}
-//			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 1);
-//		}
-//		// b is the Bukkit block that has changed
-//		Block b = player.getLocation().getBlock();		
-////		net.minecraft.server.v1_11_R1.Block kk = new net.minecraft.server.v1_11_R1.Block(net.minecraft.server.v1_11_R1.Material.GRASS, MaterialMapColor.c);
-//		net.minecraft.server.v1_11_R1.Chunk c = ((org.bukkit.craftbukkit.v1_11_R1.CraftChunk) b.getChunk()).getHandle();
-//		c.initLighting();
-//		net.minecraft.server.v1_11_R1.IBlockData blockData = c.getBlockData(new net.minecraft.server.v1_11_R1.BlockPosition(b.getX(), b.getY(), b.getZ()));
-//		net.minecraft.server.v1_11_R1.BlockPosition blockPos = new net.minecraft.server.v1_11_R1.BlockPosition(b.getX(), b.getY(), b.getZ());
-//		((org.bukkit.craftbukkit.v1_11_R1.CraftWorld) player.getWorld()).getHandle().notify(blockPos, blockData, blockData, 1);
-//		CraftWorld cWorld = (CraftWorld)theWorld;
-//cWorld.getHandle().b(EnumSkyBlock.BLOCK, X, Y, Z, lightLevel)
-//ia vezi evenimente:
-//class BlockLightChangeEvent extends BlockEvent{
-//    int oldLightLevel;
-//    int newLightLevel;
-//    public int getOldLightLevel()
-//    {
-//        return oldLightLevel;
-//    }
-//    public int getNewLightLevel()[
-//    {
-//        return newLightLevel;
-//    }
-//    public void setNewLightLevel(int level)
-//    {
-//        newLightLevel = level;
-//    }
-//}
+		MaterialData metadata = crafRedBannerState.getData();
+		metadata.setData((byte) (4 & 0xFF));
+
+//		crafRedBannerState.setType(Material.STANDING_BANNER);
+		crafRedBannerState.setBaseColor(DyeColor.RED);
+		stateX.update();
+
+		List<Pattern> patterns = new ArrayList<Pattern>(); //Create a new List called 'patterns'
+
+//		patterns.add(new Pattern(DyeColor.RED, PatternType.HALF_HORIZONTAL));
+//		patterns.add(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
+//		patterns.add(new Pattern(DyeColor.RED, PatternType.STRIPE_TOP));
+//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.STRIPE_BOTTOM));
+//		patterns.add(new Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
+//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.CIRCLE_MIDDLE));
+		patterns.add(new Pattern(DyeColor.WHITE, PatternType.SKULL));
+//		patterns.add(new Pattern(DyeColor.MAGENTA, PatternType.BORDER));
+
+		crafRedBannerState.setPatterns(patterns);
+		crafRedBannerState.update();
+		
+		new BukkitRunnable() {
+				@Override
+				public void run() {
+					MaterialData metadata = crafRedBannerState.getData();
+					byte newData = (byte) (metadata.getData() + ((byte)1));
+					if((newData & 0xFF) > (15 & 0xFF)) {
+						newData = 0 & 0xFF;
+					}
+					metadata.setData(newData);
+					crafRedBannerState.update();
+				}
+			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 4);
+
+	}
+	
+	CraftBanner crafBlueBannerState;
+	private void setFlagBlue() {
+		Location location = new Location(lobby, 21, 231, 1);
+		Block block = location.getBlock();
+		
+		BlockState stateX = block.getState();
+		stateX.setType(Material.STANDING_BANNER);
+		stateX.update();
+		
+		crafBlueBannerState = (CraftBanner) (org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner) stateX;
+
+		MaterialData metadata = crafBlueBannerState.getData();
+		metadata.setData((byte) (4 & 0xFF));
+
+		crafBlueBannerState.setBaseColor(DyeColor.BLUE);
+
+		List<Pattern> patterns = new ArrayList<Pattern>(); //Create a new List called 'patterns'
+
+//		patterns.add(new Pattern(DyeColor.RED, PatternType.HALF_HORIZONTAL));
+//		patterns.add(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
+//		patterns.add(new Pattern(DyeColor.RED, PatternType.STRIPE_TOP));
+//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.STRIPE_BOTTOM));
+//		patterns.add(new Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
+//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.CIRCLE_MIDDLE));
+		patterns.add(new Pattern(DyeColor.WHITE, PatternType.CREEPER));
+//		patterns.add(new Pattern(DyeColor.MAGENTA, PatternType.BORDER));
+
+		crafBlueBannerState.setPatterns(patterns);
+		crafBlueBannerState.update();
+		
+		new BukkitRunnable() {
+				@Override
+				public void run() {
+					MaterialData metadata = crafBlueBannerState.getData();
+					byte newData = (byte) (metadata.getData() + ((byte)1));
+					if((newData & 0xFF) > (15 & 0xFF)) {
+						newData = 0 & 0xFF;
+					}
+					metadata.setData(newData);
+					crafBlueBannerState.update();
+				}
+			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 4);
+
 	}
 
 	@EventHandler
@@ -134,7 +195,7 @@ public class LobbyListener implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerMove(PlayerMoveEvent event) {
+	public void onPlayerMoveChangeTeam(PlayerMoveEvent event) {
 		if (!ScoresAndTeams.isInLobby(event.getPlayer())) {
 			return;
 		}
@@ -148,101 +209,9 @@ public class LobbyListener implements Listener {
 				ScoresAndTeams.addBlueToLobby(event.getPlayer());
 			}
 		}
-
-//		System.out.println();
-//		System.out.println("*************** MOVE ********************");
-//		
-//		Block from = event.getFrom().getBlock().getRelative(BlockFace.UP);
-//		Block to = event.getTo().getBlock().getRelative(BlockFace.UP);
-//		
-//		System.out.println("---------------------------------");
-//		System.out.println("from up " + from.getType());
-//		System.out.println("to up " + to.getType());
-//		
-//		Block from2 = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
-//		Block to2 = event.getTo().getBlock().getRelative(BlockFace.DOWN);
-//		
-//		System.out.println("---------------------------------");
-//		System.out.println("from down " + from2.getType());
-//		System.out.println("to down " + to2.getType());
-//		
-//		Block from3 = event.getFrom().getBlock();
-//		Block to3 = event.getTo().getBlock();
-//		
-//		System.out.println("---------------------------------");
-//		System.out.println("from --- " + from3.getType());
-//		System.out.println("to --- " + to3.getType());
-//EnumParticl
-//
-//		!!!
-//PacketPlayOutWorldParticles
-//		!!!!
-//		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
-//		Block to = event.getTo().getBlock().getRelative(BlockFace.DOWN);
-//
-//		boolean movedToAnotherBlock = true;
-//		if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
-//			movedToAnotherBlock = false;
-//		}
-//
-//		if (movedToAnotherBlock && to.getType() != Material.AIR) { //&& !(to.getType() != Material.AIR || to.getType() != Material.WATER)
-//			//restore last bloack
-//			if (lastBlock != null) {
-//				lastBlock.update(true);
-//			}
-//			//save current block
-//			lastBlock = walkingBlock.getState();
-//			//replace current wuth glowstone
-//			to.setType(Material.BEACON);
-//		}
 	}
 
-	//!!!!!!!!!!!!!!!!!!!! Packet52MultiBlockChange replaced by PacketPlayOutMultiBlockChange 
-	https://bukkit.org/threads/resource-server-side-lighting-no-it-isnt-just-client-side.154503/
-	rahatul ăstra trimite 5 milioane de blocuri. Încearcă cu o tortă invizibilă (poțiune ceva)
-	static BlockState lastBlock;
-	
-	
-	public static void LightUp(int x, int y, int z, int level, int spacing, CraftWorld world, Player player) {
-		int radius = level / spacing;
-		HashMap oldBlocks = new HashMap();
-		HashMap playerBlocks = (HashMap) oldBlocks.get(player.getName());
-		if (playerBlocks != null) {
-			resetLight(playerBlocks, world);
-			playerBlocks.clear();
-		} else {
-			playerBlocks = new HashMap();
-			oldBlocks.put(player.getName(), playerBlocks);
-		}
-		for (int i = -radius; i <= radius; i++) {
-			for (int j = -radius; j <= radius; j++) {
-				for (int k = -radius; k <= radius; k++) {
-					int oldLevel = world.getHandle().j(x + i, y + j, z + k);
-					int actLevel = level - (Math.abs(i) + Math.abs(j) + Math.abs(k));
-					if (actLevel > oldLevel) {
-						playerBlocks.put(new Location(world, x + i, y + j, z + k), Integer.valueOf(oldLevel));
-						world.getHandle().b(EnumSkyBlock.BLOCK, x + i, y + j, z + k, actLevel);
-					}
-				}
-
-			}
-
-		}
-
-	}
-
-	public static void resetLight(HashMap oldBlocks2, CraftWorld world) {
-		for (Iterator iterator = oldBlocks2.entrySet().iterator(); iterator.hasNext();) {
-			java.util.Map.Entry entry = (java.util.Map.Entry) iterator.next();
-			Location location = (Location) entry.getKey();
-			if (location.getBlock().getTypeId() == 8 || location.getBlock().getTypeId() == 9) {
-				world.getHandle().b(EnumSkyBlock.BLOCK, location.getBlockX(), location.getBlockY(), location.getBlockZ(), 0);
-			} else {
-				world.getHandle().b(EnumSkyBlock.BLOCK, location.getBlockX(), location.getBlockY(), location.getBlockZ(), ((Integer) entry.getValue()).intValue());
-			}
-		}
-
-	}
+	static Map<String, BlockState[]> lastBlock = new HashMap<>();
 
 	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
