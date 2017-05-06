@@ -1,7 +1,12 @@
 package ro.coderdojo.ctf;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import net.minecraft.server.v1_11_R1.EnumParticle;
+import net.minecraft.server.v1_11_R1.PacketPlayOutWorldParticles;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,6 +23,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
+import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
@@ -28,21 +34,22 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.material.Wool;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class LobbyListener implements Listener {
 
 	World lobby;
 	FlagHandler redFlagHandler;
 	FlagHandler blueFlagHandler;
-	
+
 	public LobbyListener(World lobby) {
 		this.lobby = lobby;
 		redFlagHandler = new FlagHandler(new Location(lobby, 19, 231, 8), FlagHandler.Color.RED);
 		redFlagHandler.createFlag();
-		
+
 		blueFlagHandler = new FlagHandler(new Location(lobby, 19, 231, 15), FlagHandler.Color.BLUE);
 		blueFlagHandler.createFlag();
-		
+
 	}
 
 	@EventHandler
@@ -55,6 +62,8 @@ public class LobbyListener implements Listener {
 		healthAttribute.setBaseValue(20.00);
 		player.teleport(new Location(lobby, 18, 231, 3));
 		ScoresAndTeams.addNoTeamPlayerLobby(player);
+
+		addSparks(event.getPlayer());
 	}
 
 	@EventHandler
@@ -94,6 +103,31 @@ public class LobbyListener implements Listener {
 		event.getPlayer().sendMessage(ChatColor.YELLOW + " Nu poti sparge " + ChatColor.RED + "arena!");
 		event.setCancelled(true);
 	}
+
+	static List<Player> players = new ArrayList<>();
+	private void addSparks(Player player) {
+		players.add(player);
+		if (ScoresAndTeams.lobbyNoTeamPlayers.size() == 1) {
+			new BukkitRunnable() {
+//				//EnumParticle.PORTAL // mov
+//				//EnumParticle.REDSTONE // toaate culorile
+				//EnumParticle.VILLAGER_HAPPY//verde
+				EnumParticle particle = EnumParticle.REDSTONE;
+
+				@Override
+				public void run() {
+					//params: particula,dacă e enable, locația, offset-ul, viteza, numar particule
+					for (Player player : players) {
+						PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, true, player.getLocation().getBlockX(), player.getLocation().getBlockY() + 4, player.getLocation().getBlockZ(), 1, 1, 1, 1, 3);
+						for (Player online : Bukkit.getOnlinePlayers()) {
+							((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+						}
+					}
+				}
+			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 1);
+		}
+	}
+
 	@EventHandler
 	public void onPlayerMoveChangeTeam(PlayerMoveEvent event) {
 		if (!ScoresAndTeams.isInLobby(event.getPlayer())) {
@@ -110,10 +144,10 @@ public class LobbyListener implements Listener {
 			}
 		}
 	}
-	
+
 	@EventHandler
 	public void onPlayerMoveAddLight(PlayerMoveEvent event) {
-		if(!ScoresAndTeams.isBlue(event.getPlayer()) && !ScoresAndTeams.isRed(event.getPlayer())) {
+		if (!ScoresAndTeams.isBlue(event.getPlayer()) && !ScoresAndTeams.isRed(event.getPlayer())) {
 			return;
 		}
 		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
@@ -136,14 +170,13 @@ public class LobbyListener implements Listener {
 			//replace current wIth glowstone
 			to.setType(Material.SEA_LANTERN);
 			aboveTo.setType(Material.CARPET);
-			if(ScoresAndTeams.isBlue(event.getPlayer())){
+			if (ScoresAndTeams.isBlue(event.getPlayer())) {
 				aboveTo.setData((byte) (11 & 0xFF));//blue
 			}
-			if(ScoresAndTeams.isRed(event.getPlayer())){
+			if (ScoresAndTeams.isRed(event.getPlayer())) {
 				aboveTo.setData((byte) (14 & 0xFF));//red
 			}
-			
-			
+
 		}
 	}
 
