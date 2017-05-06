@@ -17,16 +17,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
-import org.bukkit.block.Banner;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 
-
 import org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner;
-import org.bukkit.craftbukkit.v1_11_R1.block.CraftBlockState;
+import org.bukkit.block.BlockState;
+
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -35,6 +33,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Wool;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -45,7 +44,7 @@ public class LobbyListener implements Listener {
 
 	public LobbyListener(World lobby) {
 		this.lobby = lobby;
-		setFlagRed();
+//		setFlagRed();
 //		setFlagBlue();
 	}
 
@@ -60,17 +59,35 @@ public class LobbyListener implements Listener {
 //		player.teleport(new Location(lobby, 19.589, 231, 21.860));
 		player.teleport(new Location(lobby, 18, 231, 3));
 		ScoresAndTeams.addNoTeamPlayerLobby(player);
+
+		Location location = new Location(lobby, 18, 231, 3);
+		Block block = location.getBlock();
+//		block.setType(Material.STANDING_BANNER);
+//		BlockState state =  block.getState();
+//		block.setData((byte) (4 & 0xFF));
+//		block.setMetadata(metadataKey, newMetadataValue);
+//		BlockState state = block.getState();
+		
+		block.setType(Material.STANDING_BANNER);
+1		block.setData((byte) (4 & 0xFF));
+
+
+		BlockState bs = block.getState();
+		BannerMeta banner = (BannerMeta) bs.getData();
+		banner.setBaseColor(DyeColor.BLUE);
+		bs.setData((MaterialData) banner);
+		bs.update();
+
 	}
-	
+
 	CraftBanner craftBannerState;
-	
+
 	private void setFlagRed() {
 		Location location = new Location(lobby, 18, 231, 3);
 		Block block = location.getBlock();
-		
+
 //		BlockState stateX = block.getState();
 //		stateX.setType(Material.STANDING_BANNER);
-		
 		craftBannerState = (CraftBanner) block.getState();
 
 		MaterialData metadata = craftBannerState.getData();
@@ -78,29 +95,29 @@ public class LobbyListener implements Listener {
 
 		craftBannerState.setType(Material.STANDING_BANNER);
 		craftBannerState.setBaseColor(DyeColor.RED);
-		
+
 		List<Pattern> patterns = new ArrayList<Pattern>(); //Create a new List called 'patterns'
 
 		patterns.add(new Pattern(DyeColor.WHITE, PatternType.SKULL));
 
 		craftBannerState.setPatterns(patterns);
 		craftBannerState.update();
-		
+
 		new BukkitRunnable() {
-				@Override
-				public void run() {
-					MaterialData metadata = craftBannerState.getData();
-					byte newData = (byte) (metadata.getData() + ((byte)1));
-					if((newData & 0xFF) > (15 & 0xFF)) {
-						newData = 0 & 0xFF;
-					}
-					metadata.setData(newData);
-					craftBannerState.update();
+			@Override
+			public void run() {
+				MaterialData metadata = craftBannerState.getData();
+				byte newData = (byte) (metadata.getData() + ((byte) 1));
+				if ((newData & 0xFF) > (15 & 0xFF)) {
+					newData = 0 & 0xFF;
 				}
-			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 4);
+				metadata.setData(newData);
+				craftBannerState.update();
+			}
+		}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 4);
 
 	}
-	
+
 //	CraftBlockState crafBlueBannerState;
 //	private void setFlagBlue() {
 //		Location location = new Location(lobby, 21, 231, 1);
@@ -145,7 +162,6 @@ public class LobbyListener implements Listener {
 //			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 4);
 //
 //	}
-
 	@EventHandler
 	public void playerLeave(PlayerQuitEvent event) throws Exception {
 		ScoresAndTeams.playerLeave(event.getPlayer());
