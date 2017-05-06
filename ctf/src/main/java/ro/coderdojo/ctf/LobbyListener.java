@@ -1,6 +1,7 @@
 package ro.coderdojo.ctf;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +34,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.material.Wool;
 import org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class LobbyListener implements Listener {
 
@@ -196,7 +198,9 @@ public class LobbyListener implements Listener {
 
 		ScoresAndTeams.refreshLobbyBoards(event.getEntity());
 	}
-
+	
+	CraftBanner redBanner;
+	
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onBlockBreak(BlockBreakEvent event) {
 		event.getPlayer().sendMessage(ChatColor.YELLOW + " Nu poti sparge " + ChatColor.RED + "arena!");
@@ -210,21 +214,40 @@ public class LobbyListener implements Listener {
 		block.setType(Material.STANDING_BANNER);
 
 		//color
-		CraftBanner blockstate = (CraftBanner)block.getState();
-		blockstate.setBaseColor(DyeColor.RED);
+		redBanner = (CraftBanner)block.getState();
+		redBanner.setBaseColor(DyeColor.RED);
 		
 		//set patterns
 		List<Pattern> patterns = new ArrayList<Pattern>();
-		patterns.add(new Pattern(DyeColor.BROWN, PatternType.TRIANGLE_TOP));
+		patterns.add(new Pattern(DyeColor.SILVER, PatternType.BORDER));
 		patterns.add(new Pattern(DyeColor.WHITE, PatternType.SKULL));
-		blockstate.setPatterns(patterns);
+		redBanner.setPatterns(patterns);
 		//position
-		org.bukkit.material.Banner materialBanner = (org.bukkit.material.Banner) blockstate.getData();
+		org.bukkit.material.Banner materialBanner = (org.bukkit.material.Banner) redBanner.getData();
 		materialBanner.setFacingDirection(BlockFace.EAST);
 		
 		//update block
-		blockstate.update();
+		redBanner.update();
+		rotateFlag();
 		
+	}
+	
+	private void rotateFlag() {
+		new BukkitRunnable() {
+				@Override
+				public void run() {
+					org.bukkit.material.Banner materialBanner = (org.bukkit.material.Banner) redBanner.getData();
+					int currentRotationNum = Arrays.binarySearch(BlockFace.values(), materialBanner.getFacing());
+					BlockFace newFace;
+					if(currentRotationNum == BlockFace.values().length - 1) {
+						newFace = BlockFace.SOUTH;
+					} else {
+						newFace = BlockFace.values()[currentRotationNum+1];
+					}
+					materialBanner.setFacingDirection(newFace);
+					redBanner.update();
+				}
+			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 20);
 	}
 
 	@EventHandler
