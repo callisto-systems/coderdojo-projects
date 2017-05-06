@@ -42,55 +42,57 @@ public class ArenaListener implements Listener {
 		this.arena = arena;
 	}
 
-	public void restartGame() {
-		returnBlueFlag();
-	}
+//	public void restartGame() {
+//		returnBlueFlag();
+//	}
 
-	private void returnBlueFlag() {
-		Location location = new Location(arena, 77, 72, -163);
-		
-		
-		Block block = location.getBlock();
-		block.setType(Material.STANDING_BANNER);
-		Banner banner = (Banner) block.getState();
-		banner.setPattern(1, new Pattern(DyeColor.BLACK, PatternType.SKULL));
-		banner.setBaseColor(DyeColor.RED);
-		MaterialData bannerData = banner.getData();
-		bannerData.setData((byte) (4 & 0xFF));
-
-//		banner.update();
-
-	}
+//	private void returnBlueFlag() {
+//		Location location = new Location(arena, 77, 72, -163);
+//		
+//		
+//		Block block = location.getBlock();
+//		block.setType(Material.STANDING_BANNER);
+//		Banner banner = (Banner) block.getState();
+//		banner.setPattern(1, new Pattern(DyeColor.BLACK, PatternType.SKULL));
+//		banner.setBaseColor(DyeColor.RED);
+//		MaterialData bannerData = banner.getData();
+//		bannerData.setData((byte) (4 & 0xFF));
+//
+////		banner.update();
+//
+//	}
 
 	
-	public ItemStack setBanner(Location location) {
-		
-		Block block = location.getBlock();
-//		block.getMetadata(metadataKey)
-//		block.set
-				
-		ItemStack i = new ItemStack(Material.BANNER, 1);
-		BannerMeta m = (BannerMeta) i.getItemMeta();
-		
-		m.setBaseColor(DyeColor.WHITE);
-
-		List<Pattern> patterns = new ArrayList<Pattern>(); //Create a new List called 'patterns'
-
-		patterns.add(new Pattern(DyeColor.RED, PatternType.HALF_HORIZONTAL));
-		patterns.add(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
-		patterns.add(new Pattern(DyeColor.RED, PatternType.STRIPE_TOP));
-		patterns.add(new Pattern(DyeColor.WHITE, PatternType.STRIPE_BOTTOM));
-		patterns.add(new Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
-		patterns.add(new Pattern(DyeColor.WHITE, PatternType.CIRCLE_MIDDLE));
-		m.setPatterns(patterns);
-
-		m.setDisplayName(ChatColor.ITALIC + "" + ChatColor.GREEN + "Awesome banner!"); //Setting the display name to "Awesome banner!"
-		m.setLore(Arrays.asList(ChatColor.DARK_AQUA + "Awesome banner lore!"));//Setting the lore to "Awesome banner lore!"
-
-		i.setItemMeta(m);
-
-		return i; //Return the ItemStack 'i'
-	}
+//	public ItemStack setBanner(Location location) {
+//		
+//		Block block = location.getBlock();
+////		block.getMetadata(metadataKey)
+////		block.set
+//				
+//		ItemStack i = new ItemStack(Material.BANNER, 1);
+//		BannerMeta m = (BannerMeta) i.getItemMeta();
+//		
+//		m.setBaseColor(DyeColor.WHITE);
+//
+//		List<Pattern> patterns = new ArrayList<Pattern>(); //Create a new List called 'patterns'
+//
+//		patterns.add(new Pattern(DyeColor.RED, PatternType.HALF_HORIZONTAL));
+//		patterns.add(new Pattern(DyeColor.BLACK, PatternType.RHOMBUS_MIDDLE));
+//		patterns.add(new Pattern(DyeColor.RED, PatternType.STRIPE_TOP));
+//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.STRIPE_BOTTOM));
+//		patterns.add(new Pattern(DyeColor.BLACK, PatternType.STRIPE_MIDDLE));
+//		patterns.add(new Pattern(DyeColor.WHITE, PatternType.CIRCLE_MIDDLE));
+//		m.setPatterns(patterns);
+//
+//		m.setDisplayName(ChatColor.ITALIC + "" + ChatColor.GREEN + "Awesome banner!"); //Setting the display name to "Awesome banner!"
+//		m.setLore(Arrays.asList(ChatColor.DARK_AQUA + "Awesome banner lore!"));//Setting the lore to "Awesome banner lore!"
+//
+//		i.setItemMeta(m);
+//
+//		return i; //Return the ItemStack 'i'
+//	}
+	
+	
 //	public ItemStack pokeballBanner( ) {
 //		ItemStack i = new ItemStack(Material.BANNER, 1);
 //		BannerMeta m = (BannerMeta) i.getItemMeta();

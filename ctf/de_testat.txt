@@ -1,0 +1,4 @@
+you cant get the meta of placed blocks.
+EDIT:
+Skull s = (Skull)Location().getBlock().getState();
+s.setOwner("ownername");

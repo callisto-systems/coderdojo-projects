@@ -86,7 +86,7 @@ public class CountDownTimer extends BukkitRunnable {
 		CaptureTheFlagPlugin.plugin.getServer().broadcastMessage(
 				ChatColor.WHITE + "Jucatori ramasi in lobby: " + ChatColor.RED + playersLeftInLobby.size() +
 				ChatColor.WHITE + ". Jucatori: " + ChatColor.RED + String.join(", ", playersLeftInLobby));
-		arenaListener.restartGame();
+//		arenaListener.restartGame();
 		
 	}
 
