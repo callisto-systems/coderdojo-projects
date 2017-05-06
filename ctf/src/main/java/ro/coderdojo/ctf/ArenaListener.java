@@ -62,64 +62,6 @@ public class ArenaListener implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerMoveAddLight(PlayerMoveEvent event) {
-		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
-		Block to = event.getTo().getBlock().getRelative(BlockFace.DOWN);
-		Block aboveTo = to.getLocation().add(0, 1, 0).getBlock();
-
-		if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
-			return;
-		}
-
-		//restore last bloack
-		if (lastBlock.get(event.getPlayer().getName()) != null) {
-			lastBlock.get(event.getPlayer().getName())[0].update(true);
-			lastBlock.get(event.getPlayer().getName())[1].update(true);
-		}
-
-		System.out.println();
-
-		System.out.println(
-				"*************** MOVE ********************");
-
-		Block from1 = event.getFrom().getBlock().getRelative(BlockFace.UP);
-		Block to1 = event.getTo().getBlock().getRelative(BlockFace.UP);
-
-		System.out.println("---------------------------------");
-		System.out.println("from" + from1.getType() + " x:" + from1.getX() + " y:" + from1.getY() + " z:" + from1.getX());
-		System.out.println("to" + to1.getType() + " x:" + to1.getX() + " y:" + to1.getY() + " z:" + to1.getX());
-
-		from1 = event.getFrom().getBlock();
-		to1 = event.getTo().getBlock();
-
-		System.out.println("---------------------------------");
-		System.out.println("from" + from1.getType() + " x:" + from1.getX() + " y:" + from1.getY() + " z:" + from1.getX());
-		System.out.println("to" + to1.getType() + " x:" + to1.getX() + " y:" + to1.getY() + " z:" + to1.getX());
-
-		from1 = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
-		to1 = event.getTo().getBlock().getRelative(BlockFace.DOWN);
-
-		System.out.println("---------------------------------");
-		System.out.println("from" + from1.getType() + " x:" + from1.getX() + " y:" + from1.getY() + " z:" + from1.getX());
-		System.out.println("to" + to1.getType() + " x:" + to1.getX() + " y:" + to1.getY() + " z:" + to1.getX());
-
-		System.out.println("Material: " + to.getType().isSolid());
-		if (to.getType().isSolid()) { //&& !(to.getType() != Material.AIR || to.getType() != Material.WATER)
-			//save current block
-			lastBlock.put(event.getPlayer().getName(), new BlockState[]{to.getState(), aboveTo.getState()});
-			//replace current wIth glowstone
-			to.setType(Material.SEA_LANTERN);
-			aboveTo.setType(Material.CARPET);
-			aboveTo.setData((byte) (14 & 0xFF));//red
-			aboveTo.setData((byte) (11 & 0xFF));//blue
-
-//			aboveTo.setType(Material.STAINED_GLASS_PANE);
-//			Material glass = Material.STAINED_GLASS_PANE;
-//			System.out.println("");
-		}
-	}
-
-	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
 		if (!ScoresAndTeams.isInArena(event.getPlayer())) {
 			return;

@@ -110,6 +110,42 @@ public class LobbyListener implements Listener {
 			}
 		}
 	}
+	
+	@EventHandler
+	public void onPlayerMoveAddLight(PlayerMoveEvent event) {
+		if(!ScoresAndTeams.isBlue(event.getPlayer()) && !ScoresAndTeams.isRed(event.getPlayer())) {
+			return;
+		}
+		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
+		Block to = event.getTo().getBlock().getRelative(BlockFace.DOWN);
+		Block aboveTo = to.getLocation().add(0, 1, 0).getBlock();
+
+		if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
+			return;
+		}
+
+		//restore last bloack
+		if (lastBlock.get(event.getPlayer().getName()) != null) {
+			lastBlock.get(event.getPlayer().getName())[0].update(true);
+			lastBlock.get(event.getPlayer().getName())[1].update(true);
+		}
+
+		if (to.getType().isSolid()) { //&& !(to.getType() != Material.AIR || to.getType() != Material.WATER)
+			//save current block
+			lastBlock.put(event.getPlayer().getName(), new BlockState[]{to.getState(), aboveTo.getState()});
+			//replace current wIth glowstone
+			to.setType(Material.SEA_LANTERN);
+			aboveTo.setType(Material.CARPET);
+			if(ScoresAndTeams.isBlue(event.getPlayer())){
+				aboveTo.setData((byte) (11 & 0xFF));//blue
+			}
+			if(ScoresAndTeams.isRed(event.getPlayer())){
+				aboveTo.setData((byte) (14 & 0xFF));//red
+			}
+			
+			
+		}
+	}
 
 	static Map<String, BlockState[]> lastBlock = new HashMap<>();
 
