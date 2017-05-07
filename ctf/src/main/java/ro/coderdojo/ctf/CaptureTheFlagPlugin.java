@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.block.Banner;
+import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -39,6 +40,7 @@ public class CaptureTheFlagPlugin extends JavaPlugin {
 		lobby = Bukkit.getServer().createWorld(new WorldCreator("world_lobby"));
 		lobby.setGameRuleValue("doMobSpawning", "false");
 		lobby.setDifficulty(Difficulty.HARD);
+		lobby.setBiome(0, 0, Biome.VOID);
 	}
 
 	@Override
