@@ -5,6 +5,7 @@
  */
 package ro.coderdojo.ctf;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.bukkit.DyeColor;
@@ -13,6 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner;
@@ -29,7 +31,8 @@ public class FlagHandler {
 	Location originalFlagLocation;
 	CraftBanner banner;
 	Color color;
-	
+	BlockState blockReplacedByFlag;
+
 	Player flagCarrier;
 
 	public static enum Color {
@@ -38,7 +41,7 @@ public class FlagHandler {
 
 		List<Pattern> patterns;
 		DyeColor color;
-		
+
 		Color(Pattern[] patterns, DyeColor color) {
 			this.patterns = Arrays.asList(patterns);
 			this.color = color;
@@ -58,28 +61,37 @@ public class FlagHandler {
 		if (ScoresAndTeams.hasNoTeamInLobby(player)) {
 			return;
 		}
-		if (ScoresAndTeams.isRed(player) && color == Color.RED) {
+		if (ScoresAndTeams.isRed(player) && color != Color.RED) {
 			return;
 		}
-		if (ScoresAndTeams.isBlue(player) && color == Color.BLUE) {
+		if (ScoresAndTeams.isBlue(player) && color != Color.BLUE) {
 			return;
 		}
+
 		rotateFlagRunnable.cancel();
-		banner.getBlock().setType(Material.AIR);
+
+		new BukkitRunnable() {
+			public void run() {
+				originalFlagLocation.getBlock().setType(Material.AIR);
+			}
+		}.runTask(CaptureTheFlagPlugin.plugin);
+
 		flagCarrier = player;
 		attachFlagToPlayer(player.getLocation(), player.getLocation().add(0, 1, 0));
 	}
 
 	public void attachFlagToPlayer(Location to, Location from) {
+		if(1==1){return;}
 		from.getBlock().getRelative(BlockFace.UP).setType(Material.AIR);
 		Block upBlock = from.getBlock().getRelative(BlockFace.UP);
 		upBlock.setType(Material.STANDING_BANNER);
-		CraftBanner craftBanner = (CraftBanner)			;
+		CraftBanner craftBanner = (CraftBanner) upBlock.getState();
 		craftBanner.setBaseColor(DyeColor.RED);
 	}
 
 	public void createFlag() {
 		Block block = originalFlagLocation.getBlock();
+		blockReplacedByFlag = block.getState();
 		block.setType(Material.STANDING_BANNER);
 
 		//color

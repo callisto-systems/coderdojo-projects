@@ -25,14 +25,6 @@ public class CaptureTheFlagPlugin extends JavaPlugin {
 		loadLobbyWorld();
 		plugin = this;
 		
-		Location location = new Location(lobby, 19.281, 231, 38.522);
-		Block block = location.getBlock();
-		block.setType(Material.STANDING_BANNER);
-		Banner banner = (Banner)block.getState();
-		banner.setBaseColor(DyeColor.RED);
-		
-		banner.update();
-		
 		getServer().getPluginManager().registerEvents(new LobbyListener(lobby), this);
 	}
 

@@ -44,11 +44,11 @@ public class LobbyListener implements Listener {
 
 	public LobbyListener(World lobby) {
 		this.lobby = lobby;
-		redFlagHandler = new FlagHandler(new Location(lobby, 19, 231, 8), FlagHandler.Color.RED);
+		redFlagHandler = new FlagHandler(new Location(lobby, 19, 231, 38), FlagHandler.Color.RED);
 		redFlagHandler.createFlag();
 
-		blueFlagHandler = new FlagHandler(new Location(lobby, 19, 231, 15), FlagHandler.Color.BLUE);
-		blueFlagHandler.createFlag();
+//		blueFlagHandler = new FlagHandler(new Location(lobby, 19, 231, 15), FlagHandler.Color.BLUE);
+//		blueFlagHandler.createFlag();
 
 	}
 
@@ -151,6 +151,7 @@ public class LobbyListener implements Listener {
 			return;
 		}
 		
+		redFlagHandler.takeFlagIfNecessary(event.getPlayer());
 		if(ScoresAndTeams.isRed(event.getPlayer())) {
 			redFlagHandler.attachFlagToPlayer(event.getTo(), event.getFrom());
 		}
