@@ -146,15 +146,20 @@ public class LobbyListener implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerMoveAddLight(PlayerMoveEvent event) {
+	public void onPlayerMoveAddLightAndFlag(PlayerMoveEvent event) {
 		if (!ScoresAndTeams.isBlue(event.getPlayer()) && !ScoresAndTeams.isRed(event.getPlayer())) {
 			return;
 		}
+		
+		if(ScoresAndTeams.isRed(event.getPlayer())) {
+			redFlagHandler.attachFlagToPlayer(event.getTo(), event.getFrom());
+		}
+				
 		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
 		Block to = event.getTo().getBlock().getRelative(BlockFace.DOWN);
 		Block aboveTo = to.getLocation().add(0, 1, 0).getBlock();
 
-		if (from.getX() == to.getX() && from.getY() == to.getY() && from.getZ() == to.getZ()) {
+		if(BlockUtil.isSameBlock(to, from)) {
 			return;
 		}
 
