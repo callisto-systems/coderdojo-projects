@@ -72,11 +72,11 @@ public class FlagHandler {
 
 		rotateFlagRunnable.cancel();
 
-		new BukkitRunnable() {
-			public void run() {
-				originalFlagLocation.getBlock().setType(Material.AIR);
-			}
-		}.runTask(CaptureTheFlagPlugin.plugin);
+//		new BukkitRunnable() {
+//			public void run() {
+//				originalFlagLocation.getBlock().setType(Material.AIR);
+//			}
+//		}.runTask(CaptureTheFlagPlugin.plugin);
 
 		flagCarrier = player;
 		attachFlagToPlayer(player);
@@ -91,13 +91,15 @@ public class FlagHandler {
 			return;
 		}
 		Block placedFlagBlock = event.getLocation().getBlock().getRelative(BlockFace.UP);
+		System.out.println("--------- mar:" + placedFlagBlock);
 //		BlockState state =  upBlock.getState();
-		placedFlagBlock.setType(Material.STANDING_BANNER);
+		
 		new BukkitRunnable() {
 			public void run() {
-			org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner b =flagCarried = (org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner)(placedFlagBlock.getState().getBlock());
-			b.getLocation(event.getPlayer().getLocation());
-			b.setBaseColor(DyeColor.RED);
+			placedFlagBlock.setType(Material.STANDING_BANNER);
+			org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner flagCarried = (org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner)(placedFlagBlock.getState());
+			flagCarried.getLocation(event.getPlayer().getLocation());
+			flagCarried.setBaseColor(DyeColor.RED);
 			//flagCarried
 			//flagCarried.update();	
 			}
@@ -111,7 +113,7 @@ public class FlagHandler {
 
 	public void createFlag() {
 		Block block = originalFlagLocation.getBlock();
-		blockReplacedByFlag = block.getState();
+//		blockReplacedByFlag = block.getState();
 		block.setType(Material.STANDING_BANNER);
 
 		//color
