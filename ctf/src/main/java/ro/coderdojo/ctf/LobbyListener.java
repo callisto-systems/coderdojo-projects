@@ -49,7 +49,6 @@ public class LobbyListener implements Listener {
 
 //		blueFlagHandler = new FlagHandler(new Location(lobby, 19, 231, 15), FlagHandler.Color.BLUE);
 //		blueFlagHandler.createFlag();
-
 	}
 
 	@EventHandler
@@ -105,6 +104,7 @@ public class LobbyListener implements Listener {
 	}
 
 	static List<Player> players = new ArrayList<>();
+
 	private void addSparks(Player player) {
 		players.add(player);
 		if (ScoresAndTeams.lobbyNoTeamPlayers.size() == 1) {
@@ -153,7 +153,7 @@ public class LobbyListener implements Listener {
 		
 		redFlagHandler.takeFlagIfNecessary(event.getPlayer());
 		if(ScoresAndTeams.isRed(event.getPlayer())) {
-			redFlagHandler.attachFlagToPlayer(event.getTo(), event.getFrom());
+			redFlagHandler.attachFlagToPlayer(event);
 		}
 				
 		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
@@ -185,7 +185,7 @@ public class LobbyListener implements Listener {
 
 		}
 	}
-
+	
 	static Map<String, BlockState[]> lastBlock = new HashMap<>();
 
 	@EventHandler

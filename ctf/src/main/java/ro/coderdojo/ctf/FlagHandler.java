@@ -19,6 +19,7 @@ import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -77,16 +78,31 @@ public class FlagHandler {
 		}.runTask(CaptureTheFlagPlugin.plugin);
 
 		flagCarrier = player;
-		attachFlagToPlayer(player.getLocation(), player.getLocation().add(0, 1, 0));
+//		attachFlagToPlayer(player.getLocation(), player.getLocation().add(0, 1, 0));
 	}
 
-	public void attachFlagToPlayer(Location to, Location from) {
-		if(1==1){return;}
-		from.getBlock().getRelative(BlockFace.UP).setType(Material.AIR);
-		Block upBlock = from.getBlock().getRelative(BlockFace.UP);
-		upBlock.setType(Material.STANDING_BANNER);
-		CraftBanner craftBanner = (CraftBanner) upBlock.getState();
-		craftBanner.setBaseColor(DyeColor.RED);
+	public void attachFlagToPlayer(PlayerMoveEvent event) {
+		//from.getBlock().getRelative(BlockFace.UP).setType(Material.AIR);
+		if(flagCarrier == null) {
+			return;
+		}
+		if( ! flagCarrier.getName().equalsIgnoreCase(event.getPlayer().getName())) {
+			return;
+		}
+		Block upBlock = event.getFrom().getBlock().getRelative(BlockFace.UP).getRelative(BlockFace.UP);
+		BlockState state =  upBlock.getState();
+		new BukkitRunnable() {
+			public void run() {
+				upBlock.setData((byte) (14 & 0xFF));//red
+				state.setType(Material.STANDING_BANNER);
+				state.update();
+			}
+		}.runTask(CaptureTheFlagPlugin.plugin);
+		
+//		CraftBanner craftBanner = (CraftBanner) upBlock.getState();
+//		craftBanner.setBaseColor(DyeColor.RED);
+		
+		
 	}
 
 	public void createFlag() {
