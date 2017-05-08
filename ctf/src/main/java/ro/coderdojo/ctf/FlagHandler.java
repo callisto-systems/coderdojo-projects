@@ -35,6 +35,7 @@ public class FlagHandler {
 	BlockState blockReplacedByFlag;
 
 	Player flagCarrier;
+	CraftBanner flagCarried;
 
 	public static enum Color {
 		RED(new Pattern[]{new Pattern(DyeColor.PINK, PatternType.BORDER), new Pattern(DyeColor.WHITE, PatternType.SKULL)}, DyeColor.RED),
@@ -78,10 +79,10 @@ public class FlagHandler {
 		}.runTask(CaptureTheFlagPlugin.plugin);
 
 		flagCarrier = player;
-//		attachFlagToPlayer(player.getLocation(), player.getLocation().add(0, 1, 0));
+		attachFlagToPlayer(player);
 	}
 
-	public void attachFlagToPlayer(PlayerMoveEvent event) {
+	public void attachFlagToPlayer(Player event) {
 		//from.getBlock().getRelative(BlockFace.UP).setType(Material.AIR);
 		if(flagCarrier == null) {
 			return;
@@ -89,13 +90,16 @@ public class FlagHandler {
 		if( ! flagCarrier.getName().equalsIgnoreCase(event.getPlayer().getName())) {
 			return;
 		}
-		Block upBlock = event.getFrom().getBlock().getRelative(BlockFace.UP).getRelative(BlockFace.UP);
-		BlockState state =  upBlock.getState();
+		Block placedFlagBlock = event.getLocation().getBlock().getRelative(BlockFace.UP);
+//		BlockState state =  upBlock.getState();
+		placedFlagBlock.setType(Material.STANDING_BANNER);
 		new BukkitRunnable() {
 			public void run() {
-				upBlock.setData((byte) (14 & 0xFF));//red
-				state.setType(Material.STANDING_BANNER);
-				state.update();
+			org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner b =flagCarried = (org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner)(placedFlagBlock.getState().getBlock());
+			b.getLocation(event.getPlayer().getLocation());
+			b.setBaseColor(DyeColor.RED);
+			//flagCarried
+			//flagCarried.update();	
 			}
 		}.runTask(CaptureTheFlagPlugin.plugin);
 		
