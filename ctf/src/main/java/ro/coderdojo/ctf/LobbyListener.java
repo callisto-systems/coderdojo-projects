@@ -152,6 +152,7 @@ public class LobbyListener implements Listener {
 		}
 		
 		redFlagHandler.takeFlagIfNecessary(event.getPlayer());
+		redFlagHandler.attachFlagToPlayer(event.getPlayer());
 				
 		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
 		Block to = event.getTo().getBlock().getRelative(BlockFace.DOWN);

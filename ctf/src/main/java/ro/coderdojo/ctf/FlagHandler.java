@@ -72,18 +72,17 @@ public class FlagHandler {
 
 		rotateFlagRunnable.cancel();
 
-//		new BukkitRunnable() {
-//			public void run() {
-//				originalFlagLocation.getBlock().setType(Material.AIR);
-//			}
-//		}.runTask(CaptureTheFlagPlugin.plugin);
+		new BukkitRunnable() {
+			public void run() {
+				originalFlagLocation.getBlock().setType(Material.AIR);
+			}
+		}.runTask(CaptureTheFlagPlugin.plugin);
 
 		flagCarrier = player;
-		attachFlagToPlayer(player);
+//		attachFlagToPlayer(player);
 	}
 
 	public void attachFlagToPlayer(Player event) {
-		if(1==1) {return;}
 		//from.getBlock().getRelative(BlockFace.UP).setType(Material.AIR);
 		if(flagCarrier == null) {
 			return;
@@ -91,22 +90,41 @@ public class FlagHandler {
 		if( ! flagCarrier.getName().equalsIgnoreCase(event.getPlayer().getName())) {
 			return;
 		}
-		Block placedFlagBlock = event.getLocation().getBlock().getRelative(BlockFace.UP);
-		System.out.println("--------- mar:" + placedFlagBlock);
+		Block stone = event.getLocation().getBlock().getRelative(BlockFace.UP).getRelative(BlockFace.UP);
+		stone.setType(Material.STONE);
+		Block placedFlagBlock = stone.getRelative(BlockFace.UP).getRelative(BlockFace.UP);
+		System.out.println("--------- punem:" + placedFlagBlock);
 		
-		new BukkitRunnable() {
-			public void run() {
-			placedFlagBlock.setType(Material.STANDING_BANNER);
-			org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner flagCarried = (org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner)(placedFlagBlock.getState());
-			flagCarried.getLocation(event.getPlayer().getLocation());
-			flagCarried.setBaseColor(DyeColor.RED);
-			flagCarried.update();	
-			}
-		}.runTask(CaptureTheFlagPlugin.plugin);
+//		new BukkitRunnable() {
+//			public void run() {
+//			placedFlagBlock.setType(Material.STANDING_BANNER);
+//			org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner flagCarried = (org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner)(placedFlagBlock.getState());
+//			flagCarried.getLocation(event.getPlayer().getLocation());
+//			flagCarried.setBaseColor(DyeColor.RED);
+//			flagCarried.update();	
+//			}
+//		}.runTask(CaptureTheFlagPlugin.plugin);
 		
-		
+		Block block = placedFlagBlock;
+//		blockReplacedByFlag = block.getState();
+		block.setType(Material.STANDING_BANNER);
+
+		//color
+		carriedBanner = (CraftBanner) block.getState();
+		carriedBanner.setBaseColor(color.color);
+
+		//set patterns
+		carriedBanner.setPatterns(color.patterns);
+		//position
+		org.bukkit.material.Banner materialBanner = (org.bukkit.material.Banner) carriedBanner.getData();
+		materialBanner.setFacingDirection(BlockFace.EAST);
+
+		//update block
+		carriedBanner.update();
 		
 	}
+	
+	CraftBanner carriedBanner;
 
 	public void createFlag() {
 		Block block = originalFlagLocation.getBlock();
