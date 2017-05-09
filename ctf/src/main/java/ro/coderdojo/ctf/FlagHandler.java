@@ -90,9 +90,19 @@ public class FlagHandler {
 //		if( ! flagCarrier.getName().equalsIgnoreCase(event.getPlayer().getName())) {
 //			return;
 //		}
-		
-		Location loc = new Location(lobby, player.getLocation().getBlockX() , 231, 38);
-		
+		if (carriedBanner == null || BlockUtil.isSameBlock(player.getLocation().getBlock(), carriedBanner.getBlock())) {
+			new BukkitRunnable() {
+				public void run() {
+					if (carriedBanner == null) {
+						return;
+					}
+					carriedBanner.getBlock().setType(Material.AIR);
+				}
+			}.runTask(CaptureTheFlagPlugin.plugin);
+		}
+
+		Location loc = new Location(lobby, player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ());
+
 //		Block stone = event.getLocation().getBlock().getRelative(BlockFace.UP).getRelative(BlockFace.UP);
 		Block place = player.getLocation().getBlock();
 		place.setType(Material.STONE);
