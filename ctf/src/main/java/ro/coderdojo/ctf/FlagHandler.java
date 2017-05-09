@@ -82,35 +82,24 @@ public class FlagHandler {
 //		attachFlagToPlayer(player);
 	}
 
-	public void attachFlagToPlayer(Player event) {
-		//from.getBlock().getRelative(BlockFace.UP).setType(Material.AIR);
-		if(flagCarrier == null) {
-			return;
-		}
-		if( ! flagCarrier.getName().equalsIgnoreCase(event.getPlayer().getName())) {
-			return;
-		}
-		Block stone = event.getLocation().getBlock().getRelative(BlockFace.UP).getRelative(BlockFace.UP);
-		stone.setType(Material.STONE);
-		Block placedFlagBlock = stone.getRelative(BlockFace.UP).getRelative(BlockFace.UP);
-		System.out.println("--------- punem:" + placedFlagBlock);
+	public void attachFlagToPlayer(Player player, World lobby) {
+//		if(flagCarrier == null) {
+//			return;
+//		}
+
+//		if( ! flagCarrier.getName().equalsIgnoreCase(event.getPlayer().getName())) {
+//			return;
+//		}
 		
-//		new BukkitRunnable() {
-//			public void run() {
-//			placedFlagBlock.setType(Material.STANDING_BANNER);
-//			org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner flagCarried = (org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner)(placedFlagBlock.getState());
-//			flagCarried.getLocation(event.getPlayer().getLocation());
-//			flagCarried.setBaseColor(DyeColor.RED);
-//			flagCarried.update();	
-//			}
-//		}.runTask(CaptureTheFlagPlugin.plugin);
+		Location loc = new Location(lobby, player.getLocation().getBlockX() , 231, 38);
 		
-		Block block = placedFlagBlock;
-//		blockReplacedByFlag = block.getState();
-		block.setType(Material.STANDING_BANNER);
+//		Block stone = event.getLocation().getBlock().getRelative(BlockFace.UP).getRelative(BlockFace.UP);
+		Block place = player.getLocation().getBlock();
+		place.setType(Material.STONE);
+		place.setType(Material.STANDING_BANNER);
 
 		//color
-		carriedBanner = (CraftBanner) block.getState();
+		carriedBanner = (CraftBanner) place.getState();
 		carriedBanner.setBaseColor(color.color);
 
 		//set patterns
@@ -121,14 +110,13 @@ public class FlagHandler {
 
 		//update block
 		carriedBanner.update();
-		
+
 	}
-	
+
 	CraftBanner carriedBanner;
 
 	public void createFlag() {
 		Block block = originalFlagLocation.getBlock();
-//		blockReplacedByFlag = block.getState();
 		block.setType(Material.STANDING_BANNER);
 
 		//color
