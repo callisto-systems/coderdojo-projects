@@ -90,28 +90,29 @@ public class FlagHandler {
 //		if( ! flagCarrier.getName().equalsIgnoreCase(event.getPlayer().getName())) {
 //			return;
 //		}
-		if (carriedBanner == null || BlockUtil.isSameBlock(player.getLocation().getBlock(), carriedBanner.getBlock())) {
-			new BukkitRunnable() {
-				public void run() {
-					if (carriedBanner == null) {
-						return;
-					}
-					carriedBanner.getBlock().setType(Material.AIR);
-				}
-			}.runTask(CaptureTheFlagPlugin.plugin);
-		}
+
+//		if (carriedBanner == null || BlockUtil.isSameBlock(player.getLocation().getBlock(), carriedBanner.getBlock())) {
+//			new BukkitRunnable() {
+//				public void run() {
+//					if (carriedBanner == null) {
+//						return;
+//					}
+//					carriedBanner.getBlock().setType(Material.AIR);
+//				}
+//			}.runTask(CaptureTheFlagPlugin.plugin);
+//		}
 
 		Location loc = new Location(lobby, player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ());
 
 //		Block stone = event.getLocation().getBlock().getRelative(BlockFace.UP).getRelative(BlockFace.UP);
 		Block place = player.getLocation().getBlock();
-		place.setType(Material.STONE);
+//		place.setType(Material.STONE);
 		place.setType(Material.STANDING_BANNER);
 
 		//color
 		carriedBanner = (CraftBanner) place.getState();
 		carriedBanner.setBaseColor(color.color);
-
+		
 		//set patterns
 		carriedBanner.setPatterns(color.patterns);
 		//position
@@ -120,6 +121,15 @@ public class FlagHandler {
 
 		//update block
 		carriedBanner.update();
+		
+		
+		new BukkitRunnable() {
+			public void run() {
+				carriedBanner.getBlock().setType(Material.AIR);
+			}
+		}.runTaskLater(CaptureTheFlagPlugin.plugin, 10);
+		
+		
 
 	}
 
