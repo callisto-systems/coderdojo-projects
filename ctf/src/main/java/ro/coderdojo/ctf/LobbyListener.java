@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
+import org.bukkit.Effect;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -33,6 +34,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.material.Wool;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -63,6 +65,12 @@ public class LobbyListener implements Listener {
 		ScoresAndTeams.addNoTeamPlayerLobby(player);
 
 		addSparks(event.getPlayer());
+
+		ItemStack banner = new ItemStack(Material.BANNER, 1);
+		BannerMeta meta = (BannerMeta) banner.getItemMeta();
+		meta.setBaseColor(DyeColor.RED);
+		banner.setItemMeta(meta);
+		player.getInventory().setHelmet(banner);
 	}
 
 	@EventHandler
@@ -105,26 +113,29 @@ public class LobbyListener implements Listener {
 
 	static List<Player> players = new ArrayList<>();
 
-	private void addSparks(Player player) {
+	private void addSparks(final Player player) {
 		players.add(player);
 		if (ScoresAndTeams.lobbyNoTeamPlayers.size() == 1) {
 			new BukkitRunnable() {
 //				//EnumParticle.PORTAL // mov
 //				//EnumParticle.REDSTONE // toaate culorile
 				//EnumParticle.VILLAGER_HAPPY//verde
-				EnumParticle particle = EnumParticle.REDSTONE;
+				EnumParticle particle = EnumParticle.VILLAGER_HAPPY;
 
 				@Override
 				public void run() {
 					//params: particula,dacă e enable, locația, offset-ul, viteza, numar particule
 					for (Player player : players) {
-						PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, true, player.getLocation().getBlockX(), player.getLocation().getBlockY() + 4, player.getLocation().getBlockZ(), 1, 1, 1, 1, 3);
 						for (Player online : Bukkit.getOnlinePlayers()) {
-							((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+							for(int a=4; a<24; a++) {
+								PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, true, player.getLocation().getBlockX(), player.getLocation().getBlockY() + a, player.getLocation().getBlockZ(), 1, 1, 1, 1, 3);
+								((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
+							}
 						}
+//						lobby.playEffect(player.getLocation(), Effect.MOBSPAWNER_FLAMES, 1, 20);
 					}
 				}
-			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 1);
+			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 20);
 		}
 	}
 
@@ -147,31 +158,29 @@ public class LobbyListener implements Listener {
 
 	@EventHandler
 	public void onPlayerMoveAddLightAndFlag(PlayerMoveEvent event) {
-		FlagHandler f =  new FlagHandler(new Location(lobby, 19, 231, 38), FlagHandler.Color.RED);
-		f.attachFlagToPlayer(event.getPlayer(), lobby);
-		
-		if (!ScoresAndTeams.isBlue(event.getPlayer()) && !ScoresAndTeams.isRed(event.getPlayer())) {
-			return;
-		}
-		
-		redFlagHandler.takeFlagIfNecessary(event.getPlayer());
+//		FlagHandler f =  new FlagHandler(new Location(lobby, 19, 231, 38), FlagHandler.Color.RED);
+//		f.attachFlagToPlayer(event.getPlayer(), lobby);
+//		
+//		if (!ScoresAndTeams.isBlue(event.getPlayer()) && !ScoresAndTeams.isRed(event.getPlayer())) {
+//			return;
+//		}
+
+//		redFlagHandler.takeFlagIfNecessary(event.getPlayer());
 //		redFlagHandler.attachFlagToPlayer(event.getPlayer());
-				
 		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
 		Block to = event.getTo().getBlock().getRelative(BlockFace.DOWN);
 		Block aboveTo = to.getLocation().add(0, 1, 0).getBlock();
 
-		if(BlockUtil.isSameBlock(to, from)) {
+		if (BlockUtil.isSameBlock(to, from)) {
 			return;
 		}
 
-		//restore last bloack
-		if (lastBlock.get(event.getPlayer().getName()) != null) {
-			lastBlock.get(event.getPlayer().getName())[0].update(true);
-			lastBlock.get(event.getPlayer().getName())[1].update(true);
-		}
-
 		if (to.getType().isSolid()) { //&& !(to.getType() != Material.AIR || to.getType() != Material.WATER)
+			//restore last bloack
+			if (lastBlock.get(event.getPlayer().getName()) != null) {
+				lastBlock.get(event.getPlayer().getName())[0].update(true);
+				lastBlock.get(event.getPlayer().getName())[1].update(true);
+			}
 			//save current block
 			lastBlock.put(event.getPlayer().getName(), new BlockState[]{to.getState(), aboveTo.getState()});
 			//replace current wIth glowstone
@@ -186,7 +195,7 @@ public class LobbyListener implements Listener {
 
 		}
 	}
-	
+
 	static Map<String, BlockState[]> lastBlock = new HashMap<>();
 
 	@EventHandler
