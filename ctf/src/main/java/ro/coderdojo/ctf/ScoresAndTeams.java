@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package ro.coderdojo.ctf;
 
 import java.util.ArrayList;
@@ -152,6 +147,13 @@ public class ScoresAndTeams {
 		allPlayers.addAll(lobbyNoTeamPlayers);
 		allPlayers.addAll(lobbyBluePlayers);
 		allPlayers.addAll(lobbyRedPlayers);
+		return allPlayers;
+	}
+	
+	public static List<Player> getAllArenaPlayers() {
+		List<Player> allPlayers = new ArrayList<>();
+		allPlayers.addAll(arenaBluePlayers);
+		allPlayers.addAll(arenaRedPlayers);
 		return allPlayers;
 	}
 

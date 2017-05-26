@@ -1,16 +1,10 @@
 package ro.coderdojo.ctf;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import net.minecraft.server.v1_11_R1.EnumParticle;
-import net.minecraft.server.v1_11_R1.PacketPlayOutWorldParticles;
-import org.bukkit.Bukkit;
+import java.util.Random;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
@@ -18,40 +12,22 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.ChatColor;
 import org.bukkit.DyeColor;
-import org.bukkit.Effect;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
-import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
-
 import org.bukkit.event.EventPriority;
+
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.material.Wool;
-import org.bukkit.scheduler.BukkitRunnable;
 
 public class LobbyListener implements Listener {
-
-	World lobby;
-	FlagHandler redFlagHandler;
-	FlagHandler blueFlagHandler;
-
-	public LobbyListener(World lobby) {
-		this.lobby = lobby;
-		redFlagHandler = new FlagHandler(new Location(lobby, 19, 231, 38), FlagHandler.Color.RED);
-		redFlagHandler.createFlag();
-
-//		blueFlagHandler = new FlagHandler(new Location(lobby, 19, 231, 15), FlagHandler.Color.BLUE);
-//		blueFlagHandler.createFlag();
-	}
 
 	@EventHandler
 	public void playerJoined(PlayerJoinEvent event) throws Exception {
@@ -61,16 +37,26 @@ public class LobbyListener implements Listener {
 		player.getInventory().addItem(new ItemStack(Material.WOOD_SWORD, 1));
 		AttributeInstance healthAttribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
 		healthAttribute.setBaseValue(20.00);
-		player.teleport(new Location(lobby, 18, 231, 3));
 		ScoresAndTeams.addNoTeamPlayerLobby(player);
 
-		addSparks(event.getPlayer());
+		player.teleport(getSpawnLocation(player));
+		
+	}
 
-		ItemStack banner = new ItemStack(Material.BANNER, 1);
-		BannerMeta meta = (BannerMeta) banner.getItemMeta();
-		meta.setBaseColor(DyeColor.RED);
-		banner.setItemMeta(meta);
-		player.getInventory().setHelmet(banner);
+	private Location getSpawnLocation(Player player) {
+		if (ScoresAndTeams.hasNoTeamInLobby(player)) {
+			int random = new Random().nextInt();
+			if (random % 2 == 0) {
+				return new Location(CaptureTheFlagPlugin.lobby, 19.456, 231, 2.703, -0.3f, 1.2f);
+			} else {
+				return new Location(CaptureTheFlagPlugin.lobby, 19.456, 231, 38.733, -180, 0.4f);
+			}
+		}
+		if (ScoresAndTeams.isBlueInLobby(player)) {
+			return new Location(CaptureTheFlagPlugin.lobby, 38.788, 232.06250, 21.643, 90.1f, 4.2f);
+		} else {
+			return new Location(CaptureTheFlagPlugin.lobby, -0.7, 232, 21.716, -90.06f, 3.5f);
+		}
 	}
 
 	@EventHandler
@@ -83,12 +69,14 @@ public class LobbyListener implements Listener {
 		if (!ScoresAndTeams.isInLobby(event.getPlayer())) {
 			return;
 		}
-		event.setRespawnLocation(new Location(lobby, 19.589, 231, 21.860));
+		event.setRespawnLocation(getSpawnLocation(event.getPlayer()));
 	}
 
 	@EventHandler
 	public void onKill(PlayerDeathEvent event) {
-		Player killed = event.getEntity();
+		if (!ScoresAndTeams.isInLobby(event.getEntity())) {
+			return;
+		}
 		Player killer = event.getEntity().getKiller();
 
 		if (killer == null) {
@@ -110,33 +98,11 @@ public class LobbyListener implements Listener {
 		event.getPlayer().sendMessage(ChatColor.YELLOW + " Nu poti sparge " + ChatColor.RED + "arena!");
 		event.setCancelled(true);
 	}
-
-	static List<Player> players = new ArrayList<>();
-
-	private void addSparks(final Player player) {
-		players.add(player);
-		if (ScoresAndTeams.lobbyNoTeamPlayers.size() == 1) {
-			new BukkitRunnable() {
-//				//EnumParticle.PORTAL // mov
-//				//EnumParticle.REDSTONE // toaate culorile
-				//EnumParticle.VILLAGER_HAPPY//verde
-				EnumParticle particle = EnumParticle.VILLAGER_HAPPY;
-
-				@Override
-				public void run() {
-					//params: particula,dacă e enable, locația, offset-ul, viteza, numar particule
-					for (Player player : players) {
-						for (Player online : Bukkit.getOnlinePlayers()) {
-							for(int a=4; a<24; a++) {
-								PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(particle, true, player.getLocation().getBlockX(), player.getLocation().getBlockY() + a, player.getLocation().getBlockZ(), 1, 1, 1, 1, 3);
-								((CraftPlayer) online).getHandle().playerConnection.sendPacket(packet);
-							}
-						}
-//						lobby.playEffect(player.getLocation(), Effect.MOBSPAWNER_FLAMES, 1, 20);
-					}
-				}
-			}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 20);
-		}
+	
+	@EventHandler(priority = EventPriority.HIGHEST)
+    public void onCreatureSpawn(CreatureSpawnEvent event) {
+		event.setCancelled(true);
+		event.getEntity().remove();
 	}
 
 	@EventHandler
@@ -157,48 +123,6 @@ public class LobbyListener implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerMoveAddLightAndFlag(PlayerMoveEvent event) {
-//		FlagHandler f =  new FlagHandler(new Location(lobby, 19, 231, 38), FlagHandler.Color.RED);
-//		f.attachFlagToPlayer(event.getPlayer(), lobby);
-//		
-//		if (!ScoresAndTeams.isBlue(event.getPlayer()) && !ScoresAndTeams.isRed(event.getPlayer())) {
-//			return;
-//		}
-
-//		redFlagHandler.takeFlagIfNecessary(event.getPlayer());
-//		redFlagHandler.attachFlagToPlayer(event.getPlayer());
-		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
-		Block to = event.getTo().getBlock().getRelative(BlockFace.DOWN);
-		Block aboveTo = to.getLocation().add(0, 1, 0).getBlock();
-
-		if (BlockUtil.isSameBlock(to, from)) {
-			return;
-		}
-
-		if (to.getType().isSolid()) { //&& !(to.getType() != Material.AIR || to.getType() != Material.WATER)
-			//restore last bloack
-			if (lastBlock.get(event.getPlayer().getName()) != null) {
-				lastBlock.get(event.getPlayer().getName())[0].update(true);
-				lastBlock.get(event.getPlayer().getName())[1].update(true);
-			}
-			//save current block
-			lastBlock.put(event.getPlayer().getName(), new BlockState[]{to.getState(), aboveTo.getState()});
-			//replace current wIth glowstone
-			to.setType(Material.SEA_LANTERN);
-			aboveTo.setType(Material.CARPET);
-			if (ScoresAndTeams.isBlue(event.getPlayer())) {
-				aboveTo.setData((byte) (11 & 0xFF));//blue
-			}
-			if (ScoresAndTeams.isRed(event.getPlayer())) {
-				aboveTo.setData((byte) (14 & 0xFF));//red
-			}
-
-		}
-	}
-
-	static Map<String, BlockState[]> lastBlock = new HashMap<>();
-
-	@EventHandler
 	public void onPlayerInteract(PlayerInteractEvent event) {
 		if (!ScoresAndTeams.isInLobby(event.getPlayer())) {
 			return;
@@ -211,24 +135,28 @@ public class LobbyListener implements Listener {
 		Material material = event.getClickedBlock().getState().getType();
 		Location location = event.getClickedBlock().getState().getLocation();
 		if (action == Action.RIGHT_CLICK_BLOCK && material == Material.STONE_BUTTON) {
+			System.out.println("Click: " + location);
 			if (ScoresAndTeams.isMatchStarted) {
 				player.sendMessage("Meciul este deja pornit! Asteapta sa se termine!");
 				return;
 			}
-			Location b1 = new Location(lobby, 21.0, 233.0, 21.0, location.getYaw(), location.getPitch());
-			Location b2 = new Location(lobby, 19.0, 233.0, 19.0, location.getYaw(), location.getPitch());
-			Location b3 = new Location(lobby, 17.0, 233.0, 21.0, location.getYaw(), location.getPitch());
-			Location b4 = new Location(lobby, 19.0, 233.0, 23.0, location.getYaw(), location.getPitch());
-			if (location.equals(b1) || location.equals(b2) || location.equals(b3) || location.equals(b4)) {
+			Location button1 = new Location(CaptureTheFlagPlugin.lobby, 19.0, 233.0, 42.0, location.getYaw(), location.getPitch());
+			Location button2 = new Location(CaptureTheFlagPlugin.lobby, 19.0, 233.0, 0, location.getYaw(), location.getPitch());
+			if (location.equals(button1) || location.equals(button2)) {
 				timer();
 				player.sendMessage("Ai pornit meciul!");
 				CaptureTheFlagPlugin.plugin.getServer().broadcastMessage("Meciul a fost pornit!");
+				for(Player aPlayer : ScoresAndTeams.getAllLobyPlayers()) {
+					if(ScoresAndTeams.hasNoTeamInLobby(aPlayer)) {
+						player.sendMessage(ChatColor.RED + "PORNEȘTE MECIUL ȘI NU EȘTI ÎN NICI O ECHIPĂ! AI 10 SECUNDE SĂ ALEGI!");
+					}
+				}
 			}
 		}
 	}
 
 	private void timer() {
-		CountDownTimer timer = new CountDownTimer(this);
+		CountDownTimer timer = new CountDownTimer();
 		timer.runTaskTimer(CaptureTheFlagPlugin.plugin, 3, 1);
 	}
 }

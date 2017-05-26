@@ -7,7 +7,12 @@ package ro.coderdojo.ctf;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import net.minecraft.server.v1_11_R1.EnumParticle;
+import net.minecraft.server.v1_11_R1.PacketPlayOutWorldParticles;
+import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,8 +23,11 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
 import org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner;
+import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BannerMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 /**
@@ -32,10 +40,11 @@ public class FlagHandler {
 	Location originalFlagLocation;
 	CraftBanner banner;
 	Color color;
-	BlockState blockReplacedByFlag;
 
 	Player flagCarrier;
-	CraftBanner flagCarried;
+	BukkitRunnable rotateFlagRunnable;
+
+	BlockState[] replacedBlocksByLantern;
 
 	public static enum Color {
 		RED(new Pattern[]{new Pattern(DyeColor.PINK, PatternType.BORDER), new Pattern(DyeColor.WHITE, PatternType.SKULL)}, DyeColor.RED),
@@ -56,17 +65,52 @@ public class FlagHandler {
 		this.color = color;
 	}
 
+	public void moveLightIfCarryTheFlag(PlayerMoveEvent event) {
+		if (!isCarryingTheFlag(event.getPlayer())) {
+			return;
+		}
+		Block from = event.getFrom().getBlock().getRelative(BlockFace.DOWN);
+		Block to = event.getTo().getBlock().getRelative(BlockFace.DOWN);
+		Block aboveTo = to.getLocation().add(0, 1, 0).getBlock();
+
+		if (BlockUtil.isSameBlock(to, from)) {
+			return;
+		}
+
+		if (!to.getType().isSolid()) {
+			return;
+		}
+		//restore last bloack
+		if (replacedBlocksByLantern != null) {
+			replacedBlocksByLantern[0].update(true);
+			replacedBlocksByLantern[1].update(true);
+		}
+		//save current block
+		replacedBlocksByLantern = new BlockState[]{to.getState(), aboveTo.getState()};
+
+		//replace current with glowstone and carpet
+		to.setType(Material.SEA_LANTERN);
+		aboveTo.setType(Material.CARPET);
+		if (ScoresAndTeams.isBlue(event.getPlayer())) {
+			aboveTo.setData((byte) (11 & 0xFF));//blue
+		}
+		if (ScoresAndTeams.isRed(event.getPlayer())) {
+			aboveTo.setData((byte) (14 & 0xFF));//red
+		}
+
+	}
+
 	public void takeFlagIfNecessary(Player player) {
+		if (!ScoresAndTeams.isInArena(player)) {
+			return;
+		}
 		if (!BlockUtil.isSameBlock(originalFlagLocation.getBlock(), player.getLocation().getBlock())) {
 			return;
 		}
-		if (ScoresAndTeams.hasNoTeamInLobby(player)) {
+		if (ScoresAndTeams.isRed(player) && color == Color.RED) {
 			return;
 		}
-		if (ScoresAndTeams.isRed(player) && color != Color.RED) {
-			return;
-		}
-		if (ScoresAndTeams.isBlue(player) && color != Color.BLUE) {
+		if (ScoresAndTeams.isBlue(player) && color == Color.BLUE) {
 			return;
 		}
 
@@ -78,62 +122,41 @@ public class FlagHandler {
 			}
 		}.runTask(CaptureTheFlagPlugin.plugin);
 
-		flagCarrier = player;
-//		attachFlagToPlayer(player);
+		attachFlagToPlayer(player);
+		addSparks(player);
 	}
 
-	public void attachFlagToPlayer(Player player, World lobby) {
-//		if(flagCarrier == null) {
-//			return;
-//		}
-
-//		if( ! flagCarrier.getName().equalsIgnoreCase(event.getPlayer().getName())) {
-//			return;
-//		}
-
-//		if (carriedBanner == null || BlockUtil.isSameBlock(player.getLocation().getBlock(), carriedBanner.getBlock())) {
-//			new BukkitRunnable() {
-//				public void run() {
-//					if (carriedBanner == null) {
-//						return;
-//					}
-//					carriedBanner.getBlock().setType(Material.AIR);
-//				}
-//			}.runTask(CaptureTheFlagPlugin.plugin);
-//		}
-
-		Location loc = new Location(lobby, player.getLocation().getBlockX(), player.getLocation().getBlockY(), player.getLocation().getBlockZ());
-
-//		Block stone = event.getLocation().getBlock().getRelative(BlockFace.UP).getRelative(BlockFace.UP);
-		Block place = player.getLocation().getBlock();
-//		place.setType(Material.STONE);
-		place.setType(Material.STANDING_BANNER);
-
-		//color
-		carriedBanner = (CraftBanner) place.getState();
-		carriedBanner.setBaseColor(color.color);
-		
-		//set patterns
-		carriedBanner.setPatterns(color.patterns);
-		//position
-		org.bukkit.material.Banner materialBanner = (org.bukkit.material.Banner) carriedBanner.getData();
-		materialBanner.setFacingDirection(BlockFace.EAST);
-
-		//update block
-		carriedBanner.update();
-		
-		
+	private void addSparks(final Player flagCarrier) {
 		new BukkitRunnable() {
+			@Override
 			public void run() {
-				carriedBanner.getBlock().setType(Material.AIR);
+				for (Player anArenaPlayer : ScoresAndTeams.getAllArenaPlayers()) {
+					for (int a = 4; a < 24; a++) {
+						//params: particula,dacă e enable, locația, offset-ul, viteza, numar particule
+						PacketPlayOutWorldParticles packet = new PacketPlayOutWorldParticles(
+								EnumParticle.VILLAGER_HAPPY, true,
+								flagCarrier.getLocation().getBlockX(), flagCarrier.getLocation().getBlockY() + a, flagCarrier.getLocation().getBlockZ(),
+								1, 1, 1, 1, 3);
+						((CraftPlayer) anArenaPlayer).getHandle().playerConnection.sendPacket(packet);
+					}
+				}
 			}
-		}.runTaskLater(CaptureTheFlagPlugin.plugin, 10);
-		
-		
-
+		}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 20);
 	}
 
-	CraftBanner carriedBanner;
+	public void attachFlagToPlayer(Player player) {
+		flagCarrier = player;
+		ItemStack banner = new ItemStack(Material.BANNER, 1);
+		BannerMeta meta = (BannerMeta) banner.getItemMeta();
+		meta.setBaseColor(color.color);
+		meta.setPatterns(color.patterns);
+		banner.setItemMeta(meta);
+		player.getInventory().setHelmet(banner);
+	}
+
+	public boolean isCarryingTheFlag(Player player) {
+		return flagCarrier == player;
+	}
 
 	public void createFlag() {
 		Block block = originalFlagLocation.getBlock();
@@ -153,8 +176,6 @@ public class FlagHandler {
 		banner.update();
 		rotateFlag();
 	}
-
-	BukkitRunnable rotateFlagRunnable;
 
 	private void rotateFlag() {
 		rotateFlagRunnable = new BukkitRunnable() {

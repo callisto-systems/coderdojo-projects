@@ -7,13 +7,9 @@ package ro.coderdojo.ctf;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Difficulty;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Player;
@@ -25,16 +21,7 @@ import org.bukkit.scheduler.BukkitRunnable;
  * @author mihai
  */
 public class CountDownTimer extends BukkitRunnable {
-
-	LobbyListener lobbyListener;
-	World arena;
-	ArenaListener arenaListener;
-
 	private int counter = 10 * 20;
-
-	public CountDownTimer(LobbyListener lobbyListener) {
-		this.lobbyListener = lobbyListener;
-	}
 
 	@Override
 	public void run() {
@@ -51,16 +38,7 @@ public class CountDownTimer extends BukkitRunnable {
 	}
 
 	private void startGame() {
-//		PlayerJoinEvent.getHandlerList().unregister(lobbyListener.plugin);
-//		PlayerRespawnEvent.getHandlerList().unregister(lobbyListener.plugin);
-//		PlayerMoveEvent.getHandlerList().unregister(lobbyListener.plugin);
-//		PlayerInteractEvent.getHandlerList().unregister(lobbyListener.plugin);
-
-		loadArenaWorld();
-		arenaListener = new ArenaListener(CaptureTheFlagPlugin.plugin, arena);
-		CaptureTheFlagPlugin.plugin.getServer().getPluginManager().registerEvents(arenaListener, CaptureTheFlagPlugin.plugin);
 		ScoresAndTeams.isMatchStarted = true;
-		
 		
 		System.out.println("Arena loaded");
 		List<String> playersLeftInLobby = new ArrayList<>();
@@ -72,10 +50,10 @@ public class CountDownTimer extends BukkitRunnable {
 			}
 			ScoresAndTeams.moveToArena(player);
 			if(ScoresAndTeams.isRed(player)) {
-				player.teleport(new Location(arena, -22.099, 77, -145.093));
+				player.teleport(new Location(CaptureTheFlagPlugin.arena, 57.896, 77, -163.485));
 			}
 			if(ScoresAndTeams.isBlue(player)) {
-				player.teleport(new Location(arena, 57.896, 77, -163.485));
+				player.teleport(new Location(CaptureTheFlagPlugin.arena, -22.099, 77, -145.093));
 			}
 			player.getInventory().clear();
 			player.getInventory().addItem(new ItemStack(Material.WOOD_SWORD, 1));
@@ -88,12 +66,6 @@ public class CountDownTimer extends BukkitRunnable {
 				ChatColor.WHITE + ". Jucatori: " + ChatColor.RED + String.join(", ", playersLeftInLobby));
 //		arenaListener.restartGame();
 		
-	}
-
-	private void loadArenaWorld() {
-		arena = Bukkit.getServer().createWorld(new WorldCreator("world_arena"));
-		arena.setGameRuleValue("doMobSpawning", "false");
-		arena.setDifficulty(Difficulty.HARD);
 	}
 
 }
