@@ -10,8 +10,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.server.v1_11_R1.EnumParticle;
-import net.minecraft.server.v1_11_R1.PacketPlayOutWorldParticles;
+import net.minecraft.server.v1_12_R1.EnumParticle;
+import net.minecraft.server.v1_12_R1.PacketPlayOutWorldParticles;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -22,8 +22,8 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.banner.Pattern;
 import org.bukkit.block.banner.PatternType;
-import org.bukkit.craftbukkit.v1_11_R1.block.CraftBanner;
-import org.bukkit.craftbukkit.v1_11_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_12_R1.block.CraftBanner;
+import org.bukkit.craftbukkit.v1_12_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
@@ -36,6 +36,9 @@ import org.bukkit.scheduler.BukkitRunnable;
  */
 public class FlagHandler {
 
+	//guardian_idle2.ogg
+	//levelup.ogg
+	
 	World world;
 	Location originalFlagLocation;
 	CraftBanner banner;
@@ -46,6 +49,8 @@ public class FlagHandler {
 
 	BlockState[] replacedBlocksByLantern;
 
+	public FlagHandler other;
+	
 	public static enum Color {
 		RED(new Pattern[]{new Pattern(DyeColor.PINK, PatternType.BORDER), new Pattern(DyeColor.WHITE, PatternType.SKULL)}, DyeColor.RED),
 		BLUE(new Pattern[]{new Pattern(DyeColor.LIGHT_BLUE, PatternType.BORDER), new Pattern(DyeColor.WHITE, PatternType.FLOWER)}, DyeColor.BLUE);
@@ -63,6 +68,10 @@ public class FlagHandler {
 		world = location.getWorld();
 		this.originalFlagLocation = location;
 		this.color = color;
+	}
+	
+	public void setOther(FlagHandler other) {
+		this.other = other;
 	}
 
 	public void moveLightIfCarryTheFlag(PlayerMoveEvent event) {
@@ -101,6 +110,15 @@ public class FlagHandler {
 	}
 
 	public void takeFlagIfNecessary(Player player) {
+//		System.out.println(flagCarrier);
+		if (flagCarrier != null) {
+			System.out.println(player.getLocation().getBlock().getLocation());
+			System.out.println(other.originalFlagLocation);
+			if(player.getLocation().equals(other.originalFlagLocation)) {		
+				System.err.println("AAAAAAAAAAAAAAAAAAAAAAIIIIIIIIIIIIII Punctat");
+			}
+		}
+		
 		if (!ScoresAndTeams.isInArena(player)) {
 			return;
 		}
@@ -113,7 +131,7 @@ public class FlagHandler {
 		if (ScoresAndTeams.isBlue(player) && color == Color.BLUE) {
 			return;
 		}
-
+		//if(BlockUtil.isSameBlock(originalFlagLocation.getBlock(), player.getLocation().getBlock())){}
 		rotateFlagRunnable.cancel();
 
 		new BukkitRunnable() {
@@ -123,10 +141,10 @@ public class FlagHandler {
 		}.runTask(CaptureTheFlagPlugin.plugin);
 
 		attachFlagToPlayer(player);
-		addSparks(player);
+		//addSparks(player);
 	}
 
-	private void addSparks(final Player flagCarrier) {
+	/*private void addSparks(final Player flagCarrier) {
 		new BukkitRunnable() {
 			@Override
 			public void run() {
@@ -142,7 +160,7 @@ public class FlagHandler {
 				}
 			}
 		}.runTaskTimer(CaptureTheFlagPlugin.plugin, 0, 20);
-	}
+	}*/
 
 	public void attachFlagToPlayer(Player player) {
 		flagCarrier = player;

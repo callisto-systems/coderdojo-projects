@@ -32,11 +32,16 @@ public class LobbyListener implements Listener {
 	@EventHandler
 	public void playerJoined(PlayerJoinEvent event) throws Exception {
 		Player player = event.getPlayer();
-		player.setGameMode(GameMode.ADVENTURE);
+		player.setGameMode(GameMode.SURVIVAL);
 		player.getInventory().clear();
-		player.getInventory().addItem(new ItemStack(Material.WOOD_SWORD, 1));
+		player.getInventory().addItem(new ItemStack(Material.DIAMOND_SWORD, 1));
+		player.getInventory().setHelmet(new ItemStack(Material.IRON_HELMET, 1));
+		player.getInventory().setChestplate(new ItemStack(Material.DIAMOND_CHESTPLATE, 1));
+		player.getInventory().setLeggings(new ItemStack(Material.IRON_LEGGINGS, 1));
+		player.getInventory().setBoots(new ItemStack(Material.IRON_BOOTS, 1));
+		player.getInventory().addItem(new ItemStack(Material.COOKED_BEEF, 64));
 		AttributeInstance healthAttribute = player.getAttribute(Attribute.GENERIC_MAX_HEALTH);
-		healthAttribute.setBaseValue(20.00);
+		healthAttribute.setBaseValue(10.00);
 		ScoresAndTeams.addNoTeamPlayerLobby(player);
 
 		player.teleport(getSpawnLocation(player));
@@ -107,6 +112,18 @@ public class LobbyListener implements Listener {
 
 	@EventHandler
 	public void onPlayerMoveChangeTeam(PlayerMoveEvent event) {
+		/*String text = "Bubu example";
+		IChatBaseComponent comp = IChatBaseComponent.ChatSerializer.a("{\"text\":\"" + text + " \"}");
+		comp.getChatModifier().setColor(EnumChatFormat.DARK_RED);
+		PacketPlayOutChat packet = new PacketPlayOutChat(comp, ChatMessageType.SYSTEM);
+        
+		PacketPlayOutTitle OnJoinTitle = new PacketPlayOutTitle(EnumTitleAction.TITLE, ChatSerializer.a("{\"text\":\"Welcome!\",\"color\":\"gold\",\"bold\":true}"), 20, 40,  30);
+		
+		((CraftPlayer)event.getPlayer()).getHandle().playerConnection.sendPacket(packet);
+		
+		((CraftPlayer)event.getPlayer()).getHandle().playerConnection.sendPacket(OnJoinTitle);
+		*/
+		
 		if (!ScoresAndTeams.isInLobby(event.getPlayer())) {
 			return;
 		}

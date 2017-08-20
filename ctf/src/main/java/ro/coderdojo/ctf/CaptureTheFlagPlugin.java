@@ -1,7 +1,6 @@
 package ro.coderdojo.ctf;
 
 import java.util.logging.Level;
-import static net.minecraft.server.v1_11_R1.Block.w;
 import org.bukkit.Bukkit;
 import org.bukkit.Difficulty;
 import org.bukkit.World;
@@ -40,6 +39,7 @@ public class CaptureTheFlagPlugin extends JavaPlugin {
 	private void loadArenaWorld() {
 		arena = Bukkit.getServer().createWorld(new WorldCreator("world_arena"));
 		arena.setGameRuleValue("doMobSpawning", "false");
+		//arena.setGameRuleValue("keepInventory", "true");
 		arena.setDifficulty(Difficulty.HARD);
 	}
 
